@@ -17,8 +17,6 @@ It does not require an I2C repeater and pull-up resistors.
 
 ![Radio](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/radio.jpg?raw=true)
 
-## Usage  
-
 ## Install raspi_lcd to your Raspberry Pi  
 
 	$ cd ⏎
@@ -33,6 +31,22 @@ It does not require an I2C repeater and pull-up resistors.
 
 	$ cd ~/raspi_lcd ⏎
 	$ ./raspi_lcd "Raspberry Pi LCD by bokunimo.net" ⏎
+
+## Usage  
+
+	$ ./raspi_lcd -h
+	Usage:
+	  ./raspi_lcd [-i] [-f] [-r port] [-w lcd_width] [-y row] [text...]
+	  echo text... | ./raspi_lcd [-i] [-f] [-r port] [-w lcd_width] [-y row]
+	  ./raspi_lcd -h
+	    options:
+	      -i      ignore I2C communication errors
+	      -f      use standard input
+	      -rPORT  set GPIO port number of reset LCD pin
+	      -wWIDTH set display digits; 8 or 16
+	      -yROW   set display row; 1 or 2
+	      text... display text string
+	      -h      display this help
 
 ## Blog Pages  
 
