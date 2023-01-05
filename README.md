@@ -34,6 +34,8 @@ It does not require an I2C repeater and pull-up resistors.
 
 ## Usage  
 
+"-h" option shows usage:  
+
 	$ ./raspi_lcd -h
 	Usage:
 	  ./raspi_lcd [-i] [-f] [-r port] [-w lcd_width] [-y row] [text...]
@@ -47,6 +49,21 @@ It does not require an I2C repeater and pull-up resistors.
 	      -yROW   set display row; 1 or 2 for ROW
 	      text... display text string
 	      -h      display this help
+
+## Example Code (Bash Script)  
+
+See [example.sh](https://github.com/bokunimowakaru/raspi_lcd/blob/master/example.sh) on GitHub.  
+
+	pi@raspberrypi:~/raspi_lcd $ ./example.sh
+	2023/01/05 12:27:40 STARTED -------------------------------
+	2023/01/05 12:27:40 LCD reset GPIO16
+	2023/01/05 12:27:43 LCD I2C LCD Driver / by ﾎﾞｸﾆﾓﾜｶﾙRasPi
+	2023/01/05 12:27:48 Example for AQM1602A/Y/Grove ----------
+	2023/01/05 12:27:51 LCD 2023/01/05 12:27:48 / AQM1602A/Y/Grove
+	2023/01/05 12:27:59 LCD 0123456789ABCDEF / 16 ｹﾀ ﾏﾃﾞ ﾋｮｳｼﾞ
+	2023/01/05 12:28:04 Example for AQM0802A ------------------
+	2023/01/05 12:28:07 LCD 2023/01/05 12:28:04 / AQM1602A/Y/Grove
+	2023/01/05 12:28:15 LCD 01234567 / 8ｹﾀﾋｮｳｼﾞ
 
 ## Blog Pages  
 
