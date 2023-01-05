@@ -98,6 +98,9 @@ Excample code is [raspi_lcd/grove_rgb/example.sh](https://github.com/bokunimowak
 
 ![Grove-LCD RGB Backlight](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/grove.jpg?raw=true)
 
+Tips:  
+Grove-LCD has I2C signal repeater, so the above script is enabled ACK checking function; no "-i" required for raspi_lcd options.  
+
 ## Blog Pages  
 
 * [https://bokunimo.net/blog/raspberry-pi/3179/](https://bokunimo-net.translate.goog/blog/raspberry-pi/3179/?_x_tr_sl=ja&_x_tr_tl=en)
