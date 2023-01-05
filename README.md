@@ -67,14 +67,14 @@ See [example.sh](https://github.com/bokunimowakaru/raspi_lcd/blob/master/example
 
 ## Example Code for Grove-LCD RGB Backlight  
 
-Grove-LCD RGB Backlight needs Backlight Controller in grove_rgb/raspi_backlight.  
+Grove-LCD RGB Backlight needs Backlight Controller "raspi_backlight" in "/raspi_lcd/grove_rgb/".  
 Please additionally install "raspi_backlight":  
 
 	$ cd ~/raspi_lcd/grove_rgb ⏎
 	$ make clean ⏎
 	$ make ⏎
 
-Excample code is in raspi_lcd/grove_rgb:  
+Excample code is [raspi_lcd/grove_rgb/example.sh](https://github.com/bokunimowakaru/raspi_lcd/blob/master/grove_rgb/example.sh):  
 
 	pi@raspberrypi:~/raspi_lcd/grove_rgb $ ./example.sh ⏎
 	2023/01/05 13:58:03 STARTED -------------------------------
