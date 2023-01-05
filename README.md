@@ -96,6 +96,8 @@ Excample code is [raspi_lcd/grove_rgb/example.sh](https://github.com/bokunimowak
 	2023/01/05 13:58:37 red=16(0x10), green=48(0x30), blue=16(0x10)
 	2023/01/05 13:58:40 LCD 2023/01/05 13:58:37 / RGB=(16,48,32)
 
+![Grove-LCD RGB Backlight](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/grove.jpg?raw=true)
+
 ## Blog Pages  
 
 * [https://bokunimo.net/blog/raspberry-pi/3179/](https://bokunimo-net.translate.goog/blog/raspberry-pi/3179/?_x_tr_sl=ja&_x_tr_tl=en)
