@@ -9,13 +9,13 @@ It does not require an I2C repeater and pull-up resistors.
 
 ## Schematic  
 
-![Schematic](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/schematic.png)
+![Schematic](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/schematic.png?raw=true)
 
 ## Handmade Examples  
 
-![AQM1602](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/aqm1602.jpg)
+![AQM1602](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/aqm1602.jpg?raw=true)
 
-![Radio](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/radio.jpg)
+![Radio](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/radio.jpg?raw=true)
 
 ## Usage  
 
