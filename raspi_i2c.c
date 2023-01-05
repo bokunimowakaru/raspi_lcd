@@ -52,9 +52,9 @@ https://github.com/bokunimowakaru/RaspberryPi/blob/master/libs/soft_i2c.c
 #endif
 #define GPIO_RETRY  50      			// GPIO 切換え時のリトライ回数
 #define S_NUM       16      			// 文字列の最大長
-//#define DEBUG               			// デバッグモード
+// #define DEBUG               			// デバッグモード
 #undef DEBUG
-// #define DEBUG_UTF8						// UTF8デバッグモード
+// #define DEBUG_UTF8					// UTF8デバッグモード
 
 #ifdef ARDUINO
 	byte PORT_SCL = 22;								// I2C SCLポート

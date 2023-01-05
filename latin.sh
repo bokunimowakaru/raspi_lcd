@@ -55,7 +55,6 @@ sleep 3
 /home/pi/raspi_lcd/raspi_lcd -i -w16 -y1 "LCD 0x80~0x8F" > /dev/null
 /home/pi/raspi_lcd/raspi_lcd -i -w16 -y2 "ÇüéâäàåçêëèïîìÄÅ" > /dev/null
 # C3 87 C3 BC C3 A9 C3 A2 C3 A4 C3 A0 C3 A5 C3 A7 C3 AA C3 AB C3 A8 C3 AF C3 AE C3 AC C3 84 C3 85 len=33
-# C3 87 C3 BC C3 A9 C3 A2 C3 A4 C3 A0 C3 A5 C3 A7 C3 AA C3 AB C3 A8 C3 AF C3 AE C3 AC C3 84 C3 85 len=33
 sleep 5
 
 /home/pi/raspi_lcd/raspi_lcd -i -w16 -y1 "LCD 0x90~0x9F" > /dev/null

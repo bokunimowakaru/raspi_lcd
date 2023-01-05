@@ -34,7 +34,7 @@ int WIDTH=8;						// オプション -wWIDTH
 int ROW=0;							// オプション -yROW
 
 int main(int argc,char **argv){
-	int num=1; char s[49]; s[0]='\0';
+	int num=1; char s[97]; s[0]='\0';
 	while(argc >=num+1 && argv[num][0]=='-'){
 		if(argv[num][1]=='i') ERROR_CHECK=0;
 		if(argv[num][1]=='f') LOOP=1;
@@ -92,14 +92,14 @@ int main(int argc,char **argv){
 	}
 	if(argc==num) fgets(s,sizeof(s),stdin);
 	else while(num<argc && strlen(s)<16){
-		strncat(s,argv[num],47);
-		utf_del_uni(s);
-		strncat(s," ",16);
+		strncat(s,argv[num],95);
+		// utf_del_uni(s);
+		strncat(s," ",95);
 		num++;
 	}
 	if(strlen(s)==0){
-		if(ERROR_CHECK) strncat(s,"ｴﾗｰ ｦ ﾑｼ ｼﾃ ｿｳｼﾝ",47);
-		else strncat(s,"ﾎﾞｸﾆﾓﾜｶﾙ Rasp.Pi",47);
+		if(ERROR_CHECK) strncat(s,"ｴﾗｰ ｦ ﾑｼ ｼﾃ ｿｳｼﾝ",95);
+		else strncat(s,"ﾎﾞｸﾆﾓﾜｶﾙ Rasp.Pi",95);
 	}
 	if( !i2c_init() ){
 		fprintf(stderr,"I2C ERROR in INIT\n");
