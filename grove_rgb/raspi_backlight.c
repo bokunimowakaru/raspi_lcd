@@ -69,6 +69,7 @@ int main(int argc,char **argv){
     delay(10);
     
     i2c_close();
+    printf("red=%d(0x%02X), green=%d(0x%02X), blue=%d(0x%02X)\n",r,r,g,g,b,b);
     return 0;
 }
 

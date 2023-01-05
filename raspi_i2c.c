@@ -799,8 +799,8 @@ void time2txt(char *date,unsigned long local){
 			monthLength = monthDays[month];
 		}
 
-		if (local >= monthLength) {
-			local -= monthLength;
+		if (local >= (unsigned long)monthLength) {
+			local -= (unsigned long)monthLength;
 		} else {
 		    break;
 		}

@@ -65,6 +65,37 @@ See [example.sh](https://github.com/bokunimowakaru/raspi_lcd/blob/master/example
 	2023/01/05 12:28:07 LCD 2023/01/05 12:28:04 / AQM1602A/Y/Grove
 	2023/01/05 12:28:15 LCD 01234567 / 8ｹﾀﾋｮｳｼﾞ
 
+## Example Code for Grove-LCD RGB Backlight  
+
+Grove-LCD RGB Backlight needs Backlight Controller in grove_rgb/raspi_backlight.  
+Please additionally install "raspi_backlight":  
+
+	$ cd ~/raspi_lcd/grove_rgb ⏎
+	$ make clean ⏎
+	$ make ⏎
+
+Excample code is in raspi_lcd/grove_rgb:  
+
+	pi@raspberrypi:~/raspi_lcd/grove_rgb $ ./example.sh ⏎
+	2023/01/05 13:58:03 STARTED -------------------------------
+	2023/01/05 13:58:03 RGB Backlight reset
+	2023/01/05 13:58:03 usage: /home/pi/raspi_lcd/grove_rgb/raspi_backlight [red] [green] [blue]
+	red=32(0x20), green=64(0x40), blue=16(0x10)
+	2023/01/05 13:58:07 LCD I2C LCD Driver / by ﾎﾞｸﾆﾓﾜｶﾙRasPi
+	2023/01/05 13:58:12 Example for Grove-LCD RGB Backlight ---
+	2023/01/05 13:58:12 RGB Backlight reset
+	2023/01/05 13:58:12 red=16(0x10), green=32(0x20), blue=16(0x10)
+	2023/01/05 13:58:15 LCD 2023/01/05 13:58:12 / Grove-LCD BLight
+	2023/01/05 13:58:20 RGB Backlight reset
+	2023/01/05 13:58:20 red=48(0x30), green=32(0x20), blue=16(0x10)
+	2023/01/05 13:58:23 LCD 0123456789ABCDEF / 16 ｹﾀ ﾏﾃﾞ ﾋｮｳｼﾞ
+	2023/01/05 13:58:28 RGB Backlight reset
+	2023/01/05 13:58:28 red=32(0x20), green=32(0x20), blue=16(0x10)
+	2023/01/05 13:58:32 LCD 2023/01/05 13:58:29 / RGB=(32,32,32)
+	2023/01/05 13:58:37 RGB Backlight reset
+	2023/01/05 13:58:37 red=16(0x10), green=48(0x30), blue=16(0x10)
+	2023/01/05 13:58:40 LCD 2023/01/05 13:58:37 / RGB=(16,48,32)
+
 ## Blog Pages  
 
 * [https://bokunimo.net/blog/raspberry-pi/3179/](https://bokunimo-net.translate.goog/blog/raspberry-pi/3179/?_x_tr_sl=ja&_x_tr_tl=en)
