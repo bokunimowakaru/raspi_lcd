@@ -54,7 +54,7 @@ https://github.com/bokunimowakaru/RaspberryPi/blob/master/libs/soft_i2c.c
 #define S_NUM       16      			// 文字列の最大長
 //#define DEBUG               			// デバッグモード
 #undef DEBUG
-#define DEBUG_UTF8						// UTF8デバッグモード
+// #define DEBUG_UTF8						// UTF8デバッグモード
 
 #ifdef ARDUINO
 	byte PORT_SCL = 22;								// I2C SCLポート
@@ -684,13 +684,47 @@ void utf_del_uni(char *s){
 				if(k < 0x20) s[i] = (char)(k + 0x80);
 				else if(k < 0x30) s[i] = (char)(k + 0xC0);
 				else i -= 1;
+			}else{ // 小文字で代用
+				if((byte)s[i]==0x80)      s[i]=0xA0;
+				else if((byte)s[i]==0x82) s[i]=0xA2;
+				else if((byte)s[i]==0x88) s[i]=0xA8;
+				else if((byte)s[i]==0x8A) s[i]=0xAA;
+				else if((byte)s[i]==0x8B) s[i]=0xAB;
+				else if((byte)s[i]==0x8E) s[i]=0xAE;
+				else if((byte)s[i]==0x8F) s[i]=0xAF;
+				else if((byte)s[i]==0x94) s[i]=0xB4;
+				else if((byte)s[i]==0x9A) s[i]=0xBA;
+				else if((byte)s[i]==0x9B) s[i]=0xBB;
+				p=strchr(_utf_C3_x80x90xE0, (int)s[i]);
+				if(p){
+					k = (char)(p - _utf_C3_x80x90xE0);
+					if(k < 0x20) s[i] = (char)(k + 0x80);
+					else if(k < 0x30) s[i] = (char)(k + 0xC0);
+					else i -= 1;
+				}
 			}
 		}else if((byte)s[i]==0xC2){
 			if((byte)s[i+1]==0xBF)      {i++; s[i]=0x9F;}
 			else if((byte)s[i+1]==0xA2) {i++; s[i]=0xE4;}
 			else if((byte)s[i+1]==0xA3) {i++; s[i]=0xE5;}
 			else if((byte)s[i+1]==0xA7) {i++; s[i]=0xE8;}
-		}else if((byte)s[i]==0xC4 && (byte)s[i+1]==0xB1){i++; s[i]=0xE9;}
+		}else if((byte)s[i]==0xC4 && (byte)s[i+1]==0xB1){
+			i++; s[i]=0xE9;
+		}else if((byte)s[i]==0xC5 && (byte)s[i+1]==0x93){
+			// oe
+			s[i]='o';
+			s[j]=s[i];
+			j++;
+			s[i+1]='e';
+			i++;
+		}else if((byte)s[i]==0xC5 && (byte)s[i+1]==0x92){
+			// OE
+			s[i]='O';
+			s[j]=s[i];
+			j++;
+			s[i+1]='E';
+			i++;
+		}
 		#ifdef DEBUG_UTF8
 			fprintf(stderr,"%02X ",s[i]);
 		#endif
