@@ -1,17 +1,15 @@
 /*******************************************************************************
-Raspberry Pi用 ソフトウェアI2C ライブラリ  soft_i2c
+Raspberry Pi用 ソフトウェアI2C ライブラリ  raspi_i2c
+Arduino ESP32 用 ソフトウェア I2C LCD ドライバ soft_i2c
 
 本ソースリストおよびソフトウェアは、ライセンスフリーです。(詳細は別記)
 利用、編集、再配布等が自由に行えますが、著作権表示の改変は禁止します。
 
 Arduino標準ライブラリ「Wire」は使用していない(I2Cの手順の学習用サンプル)
 
-                               			Copyright (c) 2014-2017 Wataru KUNINO
+							 			Copyright (c) 2014-2023 Wataru KUNINO
                                			https://bokunimo.net/raspi/
-********************************************************************************
-2022/12/25 raspi-gpio対応検討中【製作中・途中版】
-# (参考文献)GPIO用コマンド
-#   raspi-gpio help
+							 			https://bokunimo.net/bokunimowakaru/
 ********************************************************************************
 元ファイル：
 https://github.com/bokunimowakaru/RaspberryPi/blob/master/libs/soft_i2c.c
@@ -22,68 +20,111 @@ https://github.com/bokunimowakaru/RaspberryPi/blob/master/libs/soft_i2c.c
 //	0:成功 1:失敗
 //														2017/6/16	国野亘
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>						// uint32_t
-#include <unistd.h>         			// usleep用
-#include <ctype.h>						// isprint用
-#include <sys/time.h>					// gettimeofday用
-#include <string.h>						// strncpy用
+#ifndef ARDUINO // Raspberry Pi, Linux
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <stdint.h>						// uint32_t
+	#include <unistd.h>         			// usleep用
+	#include <ctype.h>						// isprint用
+	#include <sys/time.h>					// gettimeofday用
+	#include <string.h>						// strncpy用
+#endif
 
 // #define RASPI_GPIO // 動作未確認。【動作速度が、かなり遅い】
-#define I2C_lcd 0x3E							// LCD の I2C アドレス 
-#define PORT_SCL	"/sys/class/gpio/gpio3/value"		// I2C SCLポート
-#define PORT_SDA	"/sys/class/gpio/gpio2/value"		// I2C SDAポート
-#define PORT_SDANUM	2									// I2C SDAポートの番号
-														// SCLはSDA+1(固定)
-#define INPUT		"in"
-#define OUTPUT		"out"
-#define LOW			0
-#define HIGH		1
-#define	I2C_RAMDA	15					// I2C データシンボル長[us]
-#define GPIO_RETRY  50      			// GPIO 切換え時のリトライ回数
-#define S_NUM       16       			// 文字列の最大長
-//	#define DEBUG               		// デバッグモード
 
-typedef unsigned char byte; 
-FILE *fgpio;
-char buf[S_NUM];
-struct timeval micros_time;				//time_t micros_time;
-int micros_prev,micros_sec;
+#define I2C_lcd 0x3E						// LCD の I2C アドレス
+
+#ifndef ARDUINO // Raspberry Pi, Linux
+	#define PORT_SCL	"/sys/class/gpio/gpio3/value"		// I2C SCLポート
+	#define PORT_SDA	"/sys/class/gpio/gpio2/value"		// I2C SDAポート
+	#define PORT_SDANUM	2									// I2C SDAポートの番号
+															// SCLはSDA+1(固定)
+	#define INPUT		"in"
+	#define OUTPUT		"out"
+	#define LOW			0
+	#define HIGH		1
+#endif
+
+#ifdef ARDUINO
+	#define	I2C_RAMDA	30				// I2C データシンボル長[us]
+#else  // Raspberry Pi, Linux
+	#define	I2C_RAMDA	15				// I2C データシンボル長[us]
+#endif
+#define GPIO_RETRY  50      			// GPIO 切換え時のリトライ回数
+#define S_NUM       16      			// 文字列の最大長
+//#define DEBUG               			// デバッグモード
+#undef DEBUG
+// #define DEBUG_UTF8						// UTF8デバッグモード
+
+#ifdef ARDUINO
+	byte PORT_SCL = 22;								// I2C SCLポート
+	byte PORT_SDA = 21;								// I2C SDAポート
+	unsigned long micros_prev;
+#else  // Raspberry Pi, Linux
+	typedef unsigned char byte; 
+	FILE *fgpio;
+	char buf[S_NUM];
+	struct timeval micros_time;				//time_t micros_time;
+	int micros_prev,micros_sec;
+#endif
 int ERROR_CHECK=1;								// 1:ACKを確認／0:ACKを無視する
 static byte _lcd_size_x=8;
 static byte _lcd_size_y=2;
 
 int _micros(){
-	int micros;
-	gettimeofday(&micros_time, NULL);    // time(&micros_time);
-	micros = micros_time.tv_usec;
-	if(micros_prev > micros ) micros_sec++;
-	micros_prev = micros;
-	micros += micros_sec * 1000000;
-	return micros;
+	#ifdef ARDUINO
+		unsigned long micros_sec=micros();
+		if( micros_prev < micros_sec ) return micros_sec - micros_prev;
+		return ( UINT_MAX - micros_prev ) + micros_sec;
+	#else  // Raspberry Pi, Linux
+		int micros;
+		gettimeofday(&micros_time, NULL);    // time(&micros_time);
+		micros = micros_time.tv_usec;
+		if(micros_prev > micros ) micros_sec++;
+		micros_prev = micros;
+		micros += micros_sec * 1000000;
+		return micros;
+	#endif
 }
 
 void _micros_0(){
-	micros_sec=0;
+	#ifdef ARDUINO
+		micros_prev=micros();
+	#else  // Raspberry Pi, Linux
+		micros_sec=0;
+	#endif
 }
 
 void _delayMicroseconds(int i){
-	usleep(i);
+	#ifdef ARDUINO
+		delayMicroseconds(i);
+	#else  // Raspberry Pi, Linux
+		usleep(i);
+	#endif
 }
 
+#ifndef ARDUINO // Raspberry Pi, Linux
 void delay(int i){
 	while(i){
 		_delayMicroseconds(1000);
 		i--;
 	}
 }
+#endif
 
 void i2c_debug(const char *s,byte priority){
-	if(priority>3)	fprintf(stderr,"[%10d] ERROR:%s\n",_micros(),s);
-    #ifdef DEBUG
-	else 			fprintf(stderr,"[%10d]      :%s\n",_micros(),s);
-    #endif
+	#ifdef ARDUINO
+		#ifdef DEBUG
+		   	Serial.print(_micros());
+			if(priority>3) Serial.print(" ERROR:"); else Serial.print("      :");
+			Serial.println(s);
+		#endif
+	#else // Raspberry Pi, Linux
+		if(priority>3)	fprintf(stderr,"[%10d] ERROR:%s\n",_micros(),s);
+	    #ifdef DEBUG
+		else 			fprintf(stderr,"[%10d]      :%s\n",_micros(),s);
+	    #endif
+	#endif
 }
 
 void i2c_error(const char *s){
@@ -93,6 +134,7 @@ void i2c_log(const char *s){
 	i2c_debug(s,1);
 }
 
+#ifndef ARDUINO // Raspberry Pi, Linux
 byte pinMode(char *port, char *mode){
 // 戻り値：０の時はエラー
   #ifdef RASPI_GPIO
@@ -146,7 +188,9 @@ byte pinMode(char *port, char *mode){
   #endif
   return 0;
 }
+#endif
 
+#ifndef ARDUINO // Raspberry Pi, Linux
 byte digitalRead(char *port){
   #ifdef RASPI_GPIO
 	FILE *pp;
@@ -185,7 +229,9 @@ byte digitalRead(char *port){
   #endif
     return (byte)atoi(buf);
 }
+#endif
 
+#ifndef ARDUINO // Raspberry Pi, Linux
 byte digitalWrite(char *port, int value){
 // 戻り値：０の時はエラー
   #ifdef RASPI_GPIO
@@ -216,7 +262,9 @@ byte digitalWrite(char *port, int value){
   #endif
     return 0;
 }
+#endif
 
+#ifndef ARDUINO // Raspberry Pi, Linux
 byte i2c_hard_reset(int port){
 	// 戻り値：０の時はエラー
   #ifdef RASPI_GPIO
@@ -287,7 +335,28 @@ byte i2c_hard_reset(int port){
   #endif
   return 1;
 }
+#endif
 
+#ifdef ARDUINO
+void i2c_SCL(byte level){
+	if( level ){
+		pinMode(PORT_SCL, INPUT);
+	}else{
+		pinMode(PORT_SCL, OUTPUT);
+		digitalWrite(PORT_SCL, LOW);
+	}
+	_delayMicroseconds(I2C_RAMDA);
+}
+void i2c_SDA(byte level){
+	if( level ){
+		pinMode(PORT_SDA, INPUT);
+	}else{
+		pinMode(PORT_SDA, OUTPUT);
+		digitalWrite(PORT_SDA, LOW);
+	}
+	_delayMicroseconds(I2C_RAMDA);
+}
+#else
 byte i2c_SCL(byte level){
 // 戻り値：０の時はエラー
 	byte ret=0;
@@ -300,7 +369,6 @@ byte i2c_SCL(byte level){
 	_delayMicroseconds(I2C_RAMDA);
 	return !ret;
 }
-
 byte i2c_SDA(byte level){
 // 戻り値：０の時はエラー
 	byte ret=0;
@@ -313,6 +381,7 @@ byte i2c_SDA(byte level){
 	_delayMicroseconds(I2C_RAMDA);
 	return !ret;
 }
+#endif
 
 byte i2c_tx(const byte in){
 // 戻り値：０の時はエラー
@@ -406,7 +475,7 @@ byte i2c_start(void){
 //	if(!i2c_init())return(0);				// SDA,SCL  H Out
 	int i;
 
-	for(i=5000;i>0;i--){					// リトライ 5000ms
+	for(i=GPIO_RETRY*100;i>0;i--){			// リトライ 50×100ms
 		i2c_SDA(1);							// (SDA)	H Imp
 		i2c_SCL(1);							// (SCL)	H Imp
 		if( digitalRead(PORT_SCL)==1 &&
@@ -551,6 +620,10 @@ byte i2c_write(byte adr, byte *tx, byte len){
 
 byte i2c_lcd_out(byte y,byte *lcd){
 // 戻り値：０の時はエラー
+	#ifdef I2C_LCD_OFF
+		Serial.println((char *)lcd);
+		return 1;
+	#endif
 	byte data[2];
 	byte i;
 	byte ret=0;
@@ -574,29 +647,67 @@ byte i2c_lcd_out(byte y,byte *lcd){
 	return !ret;
 }
 
+const char _utf_x80_x90_xE0[]={
+	0x87, 0xBC, 0xA9, 0xA2, 0xA4, 0xA0, 0xA5, 0xA7,
+	0xAA, 0xAB, 0xA8, 0xAF, 0xAE, 0xAC, 0x84, 0x85,
+	0x89, 0xA6, 0x86, 0xB4, 0xB2, 0xBB, 0xB9, 0xBF,
+	0x96, 0x9C, 0xB1, 0x91, 0x2E, 0x2E, 0x2E, 0x2E,
+	0xA1, 0xAD, 0xB3, 0xBA, 0x2E, 0x2E, 0x2E, 0x2E,
+	0x2E, 0x2E, 0x83, 0xA3, 0x95, 0xB5, 0x98, 0xB8,
+	0x00
+};
+
 void utf_del_uni(char *s){
 	byte i=0;
 	byte j=0;
+	char k;
+	char *p;
+	#ifdef DEBUG_UTF8
+		fprintf(stderr,"in > ");
+		while(s[i]!='\0'){
+			fprintf(stderr,"%02X ",s[i]);
+			i++;
+		}
+		fprintf(stderr,"len=%d\n",i+1);
+		i=0;
+		fprintf(stderr,"out> ");
+	#endif
 	while(s[i]!='\0'){
 		if((byte)s[i]==0xEF){
 			if((byte)s[i+1]==0xBE) s[i+2] += 0x40;
 			i+=2;
 		}
-		// fprintf(stderr,"%02X ",s[i]);
-		if(isprint(s[i]) || (s[i]>=0xA1 && s[i] <=0xDF)){
+		if((byte)s[i]==0xC3){	// 2バイト ラテン文字
+			i+=1;
+			p=strchr(_utf_x80_x90_xE0, (int)s[i]);
+			if(p){
+				k = (char)(p - _utf_x80_x90_xE0);
+				if(k < 0x20) s[i] = (char)(k + 0x80);
+				else if(k < 0x30) s[i] = (char)(k + 0xE0);
+			}
+		}
+		#ifdef DEBUG_UTF8
+			fprintf(stderr,"%02X ",s[i]);
+		#endif
+		if(isprint(s[i]) || ((byte)s[i]>=0x80 && (byte)s[i] <=0xEF)){
 			s[j]=s[i];
 			j++;
 		}
 		i++;
 	}
 	s[j]='\0';
-	// fprintf(stderr,"len=%d\n",j);
+	#ifdef DEBUG_UTF8
+		fprintf(stderr,"len=%d\n",j);
+	#endif
 }
 
 	byte i2c_lcd_print(char *s);
 
 byte i2c_lcd_init(void){
 // 戻り値：０の時はエラー
+	#ifdef I2C_LCD_OFF
+		return;
+	#endif
 	byte ret=0;
 	byte data[2];
 
@@ -617,6 +728,9 @@ byte i2c_lcd_init(void){
 
 byte i2c_lcd_init_xy(byte x, byte y){
 // 戻り値：０の時はエラー
+	#ifdef I2C_LCD_OFF
+		return;
+	#endif
 	if(x==16||x==8||x==20) _lcd_size_x=x;
 	if(y==1 ||y==2) _lcd_size_y=y;
 	return i2c_lcd_init();
@@ -627,14 +741,25 @@ void i2c_lcd_set_xy(byte x, byte y){
 	if(y==1 ||y==2) _lcd_size_y=y;
 }
 
+#ifdef ARDUINO
+void i2c_lcd_init_xy_sdascl(byte x,byte y,byte sda,byte scl){
+	if(x==16||x==8||x==20) _lcd_size_x=x;
+	if(y==1 ||y==2) _lcd_size_y=y;
+	PORT_SCL = scl;
+	PORT_SDA = sda;
+	i2c_lcd_init();
+}
+#endif
+
 byte i2c_lcd_print(char *s){
 // 戻り値：０の時はエラー
 	byte i,j;
-	char str[65];
+	char str[97];
 	byte lcd[21];
 	byte ret=0;
 
-	strncpy(str,s,64);
+	strncpy(str,s,96);
+	str[96]='\0';
 	utf_del_uni(str);
 	for(j=0;j<2;j++){
 		lcd[_lcd_size_x]='\0';
@@ -659,10 +784,11 @@ byte i2c_lcd_print2(char *s){
 // 戻り値：０の時はエラー
 	byte ret=0;
 	byte i;
-	char str[65];
+	char str[97];
 	byte lcd[21];
 	
-	strncpy(str,s,64);
+	strncpy(str,s,96);
+	str[96]='\0';
 	utf_del_uni(str);
 	lcd[_lcd_size_x]='\0';
 	for(i=0;i<_lcd_size_x;i++){
@@ -831,3 +957,60 @@ byte i2c_lcd_print_time(unsigned long local){
 	}
 	return !ret;
 }
+
+/******************************************************************************/
+/* トランジスタ技術 2016.6 ESP-WROOM-02特集記事用 I2C LCD ライブラリ 互換 API */
+/*																			  */
+/*										Copyright (c) 2014-2019 Wataru KUNINO */
+/******************************************************************************/
+
+#ifdef ARDUINO
+
+void lcdOut(byte y,byte *lcd){
+	i2c_lcd_out(y,lcd);
+}
+
+void lcdPrint(const char *s){
+	i2c_lcd_print(s);
+}
+
+void lcdPrint(String s){
+    char lcd[49];                               // 表示用変数を定義(49バイト48文字)
+    int len;                                    // 文字列長を示す整数型変数を定義
+    memset(lcd, 0, 49);                         // 文字列変数lcdの初期化(49バイト)
+	s.toCharArray(lcd, 49);
+	i2c_lcd_print(lcd);
+}
+
+void lcdPrint2(const char *s){
+	i2c_lcd_print2(s);
+}
+
+void lcdPrintIp(uint32_t ip){
+	i2c_lcd_print_ip(ip);
+}
+
+void lcdPrintIp2(uint32_t ip){
+	i2c_lcd_print_ip2(ip);
+}
+
+void lcdPrintVal(const char *s,int in){
+	i2c_lcd_print_val(s,in);
+}
+
+void lcdPrintTime(unsigned long local){
+	i2c_lcd_print_time(local);
+}
+
+void lcdSetup(byte x, byte y, byte sda,byte scl){
+	i2c_lcd_init_xy_sdascl(x,y,sda,scl);
+}
+
+void lcdSetup(byte x, byte y){
+	i2c_lcd_init_xy(x,y);
+}
+
+void lcdSetup(){
+	i2c_lcd_init();
+}
+#endif
