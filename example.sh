@@ -14,6 +14,7 @@
 #   $ sudo apt install git ⏎ (LITE版OS使用時)
 #   $ git clone https://bokunimo.net/git/raspi_lcd ⏎
 #   $ cd raspi_lcd ⏎
+#   $ make clean ⏎
 #   $ make ⏎
 #
 # (参考情報)LCD表示用プログラム raspi_lcd の使い方：
