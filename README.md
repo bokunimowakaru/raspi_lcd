@@ -38,6 +38,8 @@ I made it to display the radio channel name of the Internet radio, the artist an
 
 ![Radio](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/radio.jpg?raw=true)
 
+![Music](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/music.jpg?raw=true)
+
 ## Install "raspi_lcd" to your Raspberry Pi  
 
 	$ cd ⏎
