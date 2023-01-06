@@ -12,9 +12,9 @@ Supports to display some Latin characters for French, and all of Japanese Kataka
 
 Select language to transrate this page:
 
-* [Japanese(japonaise)](https://git-bokunimo-com.translate.goog/raspi_lcd/?_x_tr_sl=en&_x_tr_tl=ja)
+* [Japanese(japonaise)](https://translate.google.com/website?sl=en&tl=ja&hl&u=https://git.bokunimo.com/raspi_lcd/)
 * [English(Anglais)](https://git.bokunimo.com/raspi_lcd/)
-* [French(Français)](https://git-bokunimo-com.translate.goog/raspi_lcd/?_x_tr_sl=en&_x_tr_tl=fr)
+* [French(Français)](https://translate.google.com/website?sl=en&tl=fr&hl&u=https://git.bokunimo.com/raspi_lcd/)
 
 ## Schematic  
 
@@ -120,9 +120,14 @@ Grove-LCD has I2C signal repeater, so the above script is enabled ACK checking f
 
 ## Blog Pages  
 
-* [https://bokunimo.net/blog/raspberry-pi/3179/](https://bokunimo-net.translate.goog/blog/raspberry-pi/3179/?_x_tr_sl=ja&_x_tr_tl=en)
+I2C LCD AQM1602 0802 directly connect to Raspberry Pi
+* [https://bokunimo.net/blog/raspberry-pi/3253/](https://translate.google.com/website?sl=ja&tl=en&hl&u=https://bokunimo.net/blog/raspberry-pi/3253/)
 
-* [https://bokunimo.net/blog/raspberry-pi/83/](https://bokunimo-net.translate.goog/blog/raspberry-pi/83/?_x_tr_sl=ja&_x_tr_tl=en)
+Internet Radio and Jukebox on Raspberry Pi + DAC
+* [https://bokunimo.net/blog/raspberry-pi/3179/](https://translate.google.com/website?sl=ja&tl=en&hl&u=https://bokunimo.net/blog/raspberry-pi/3179/)
+
+Example scripts for Apple Pi (produced by [BitTradeOne](https://bit-trade-one.co.jp/adcq1905/))
+* [https://bokunimo.net/blog/raspberry-pi/83/](https://translate.google.com/website?sl=ja&tl=en&hl&u=https://bokunimo.net/blog/raspberry-pi/83/)
 
 ## GitHub Pages (This Document)  
 

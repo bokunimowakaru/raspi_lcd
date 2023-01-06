@@ -72,7 +72,7 @@ int main(int argc,char **argv){
 			printf("  %s -h\n\n",argv[0]);
 			printf("    options:\n");
 			printf("      -i      ignore I2C communication errors\n");
-			printf("      -f      use standard input\n");
+			printf("      -f      use standard input, continuously\n");
 			printf("      -rPORT  set GPIO port number of reset LCD pin; number for PORT\n");
 			printf("      -wWIDTH set display digits; 8 or 16 for WITDH\n");
 			printf("      -yROW   set display row; 1 or 2 for ROW\n");
