@@ -6,11 +6,11 @@ I2C LCD Device Driver for Raspberry Pi, AQM0802A, AQM1602A, AQM1602Y, GROVE-LCD
 
 I2C interface signals SCL and SDA can be directly connected to Raspberry Pi.  
 It does not require an I2C repeater and pull-up resistors.  
-Supports display some Latin characters, and all of Japanese Katakana.  
+Supports to display some Latin characters for French, and all of Japanese Katakana.  
 
 ## Language
 
-Please select language:
+Select language to transrate this page:
 
 * [Japanese(japonaise)](https://git-bokunimo-com.translate.goog/raspi_lcd/?_x_tr_sl=en&_x_tr_tl=ja)
 * [English(Anglais)](https://git.bokunimo.com/raspi_lcd/)
@@ -124,7 +124,7 @@ Grove-LCD has I2C signal repeater, so the above script is enabled ACK checking f
 
 * [https://bokunimo.net/blog/raspberry-pi/83/](https://bokunimo-net.translate.goog/blog/raspberry-pi/83/?_x_tr_sl=ja&_x_tr_tl=en)
 
-## GitPages (This Document)  
+## GitHub Pages (This Document)  
 
 * [https://git.bokunimo.com/raspi_lcd/](https://git.bokunimo.com/raspi_lcd/)
 
