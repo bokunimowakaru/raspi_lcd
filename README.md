@@ -2,10 +2,19 @@
 
 I2C LCD Device Driver for Raspberry Pi, AQM0802A, AQM1602A, AQM1602Y, GROVE-LCD  
 
-## Description  
+## Features  
 
 I2C interface signals SCL and SDA can be directly connected to Raspberry Pi.  
 It does not require an I2C repeater and pull-up resistors.  
+Supports display some Latin characters, and all of Japanese Katakana.  
+
+## Language
+
+Please select language:
+
+* [Japanese(japonaise)](https://git-bokunimo-com.translate.goog/raspi_lcd/?_x_tr_sl=en&_x_tr_tl=ja)
+* [English(Anglais)](https://git.bokunimo.com/raspi_lcd/)
+* [French(Français)](https://git-bokunimo-com.translate.goog/raspi_lcd/?_x_tr_sl=en&_x_tr_tl=fr)
 
 ## Schematic  
 
@@ -13,11 +22,19 @@ It does not require an I2C repeater and pull-up resistors.
 
 ## Handmade Examples  
 
+The picture below shows it connected to the Raspberry Pi Zero. Other Raspberry Pi (2/3/4 etc.) can be connected in the same way.  
+
 ![AQM1602](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/aqm1602.jpg?raw=true)
+
+It can display French using Latin letters, if your LCD hardware supports (Grove LCD cannot).  
+
+![Latin](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/latin.jpg?raw=true)
+
+I made it to display the radio channel name of the Internet radio, the artist and the song names of the jukebox, .  
 
 ![Radio](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/radio.jpg?raw=true)
 
-## Install raspi_lcd to your Raspberry Pi  
+## Install "raspi_lcd" to your Raspberry Pi  
 
 	$ cd ⏎
 	$ sudo apt install raspi-gpio ⏎ (for legacy OS)
@@ -47,8 +64,8 @@ It does not require an I2C repeater and pull-up resistors.
 	      -rPORT  set GPIO port number of reset LCD pin; number for PORT
 	      -wWIDTH set display digits; 8 or 16 for WITDH
 	      -yROW   set display row; 1 or 2 for ROW
-	      text... display text string
-	      -h      display this help
+	      text... display text string on the LCD
+	      -h      show this help on the terminal
 
 ## Example Code (Bash Script)  
 

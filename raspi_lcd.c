@@ -69,15 +69,15 @@ int main(int argc,char **argv){
 			printf("Usage:\n");
 			printf("  %s [-i] [-f] [-r port] [-w lcd_width] [-y row] [text...]\n",argv[0]);
 			printf("  echo text... | %s [-i] [-f] [-r port] [-w lcd_width] [-y row]\n",argv[0]);
-			printf("  %s -h\n",argv[0]);
+			printf("  %s -h\n\n",argv[0]);
 			printf("    options:\n");
 			printf("      -i      ignore I2C communication errors\n");
 			printf("      -f      use standard input\n");
 			printf("      -rPORT  set GPIO port number of reset LCD pin; number for PORT\n");
 			printf("      -wWIDTH set display digits; 8 or 16 for WITDH\n");
 			printf("      -yROW   set display row; 1 or 2 for ROW\n");
-			printf("      text... display text string\n");
-			printf("      -h      display this help\n");
+			printf("      text... display text string on the LCD\n");
+			printf("      -h      display this help on the terminal\n\n");
 			printf("    オプション(in Japanese):\n");
 			printf("      -i      I2C通信のエラーを無視する\n");
 			printf("      -f      標準入力から待ち受けを行う（終了しない）\n");
