@@ -16,9 +16,11 @@ Select language to transrate this page:
 * [English(Anglais)](https://git.bokunimo.com/raspi_lcd/)
 * [French(Français)](https://translate.google.com/website?sl=en&tl=fr&hl&u=https://git.bokunimo.com/raspi_lcd/)
 
-## Schematic  
+## Schematics  
 
-![Schematic](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/schematic.png?raw=true)
+![Schematic1](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/schematic.png?raw=true)
+
+![Schematic2](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/schematic2.png?raw=true)
 
 ## Handmade Examples  
 
