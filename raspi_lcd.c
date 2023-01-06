@@ -91,7 +91,7 @@ int main(int argc,char **argv){
 		num++;
 	}
 	if(argc==num) fgets(s,sizeof(s),stdin);
-	else while(num<argc && strlen(s)<16){
+	else while(num<argc && strlen(s)<94){
 		strncat(s,argv[num],95);
 		// utf_del_uni(s);
 		strncat(s," ",95);
