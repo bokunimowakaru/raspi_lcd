@@ -5,7 +5,7 @@ I2C LCD Device Driver for Raspberry Pi, AQM0802A, AQM1602A, AQM1602Y, GROVE-LCD
 ## Features  
 
 I2C interface signals SCL and SDA can be directly connected to Raspberry Pi.  
-It does not require an I2C repeater and pull-up resistors.  
+(It does not require an I2C repeater and pull-up resistors.)  
 Supports to display some Latin characters for French, and all of Japanese Katakana.  
 
 ## Language
@@ -28,7 +28,7 @@ The picture below shows it connected to the Raspberry Pi Zero. Other Raspberry P
 
 ![AQM1602](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/aqm1602.jpg?raw=true)
 
-It can display French using Latin letters, if your LCD hardware supports (Grove LCD cannot).  
+It can display French Latin letters, if your LCD hardware supports (Grove LCD cannot).  
 
 ![Latin](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/latin.jpg?raw=true)
 
@@ -93,7 +93,7 @@ Please additionally install "raspi_backlight":
 	$ make clean ⏎
 	$ make ⏎
 
-Excample code is [raspi_lcd/grove_rgb/example.sh](https://github.com/bokunimowakaru/raspi_lcd/blob/master/grove_rgb/example.sh):  
+The example code for Grove-LCD is in here: [raspi_lcd/grove_rgb/example.sh](https://github.com/bokunimowakaru/raspi_lcd/blob/master/grove_rgb/example.sh):  
 
 	pi@raspberrypi:~/raspi_lcd/grove_rgb $ ./example.sh ⏎
 	2023/01/05 13:58:03 STARTED -------------------------------
