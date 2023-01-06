@@ -20,6 +20,8 @@ Select language to transrate this page:
 
 ![Schematic1](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/schematic.png?raw=true)
 
+On the above Schematic, the power supply for the LCD is from GPIO16, to control the power and hardware reset function from Raspberry Pi. 
+
 ![Schematic2](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/schematic2.png?raw=true)
 
 ## Handmade Examples  
