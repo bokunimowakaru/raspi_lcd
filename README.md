@@ -26,9 +26,13 @@ On the above Schematic, the power supply for the LCD is from GPIO16, to control 
 
 ## Handmade Examples  
 
-The picture below shows it connected to the Raspberry Pi Zero. Other Raspberry Pi (2/3/4 etc.) can be connected in the same way.  
+The picture below shows it connected to the Raspberry Pi Zero. Other Raspberry Pi (1/2/3/4 etc.) can be connected in the same way.  
 
 ![AQM1602](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/aqm1602.jpg?raw=true)
+
+It works on the 1st generation Raspbeery Pi:  
+
+![RaspPi1](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/raspi1.jpg?raw=true)
 
 It can display French Latin letters, if your LCD hardware supports (Grove LCD cannot).  
 

@@ -94,6 +94,9 @@ sleep 5
 # LCDへの文字列表示例
 
 echo `date` "Example for Grove-LCD RGB Backlight ---" >> $LOG 2>&1
+rgb_reset 48 16 32 >> $LOG 2>&1
+lcd "ﾎﾞｸﾆﾓﾜｶﾙRasPiLCD" "for Grove-LCD BL" >> $LOG 2>&1
+sleep 5
 rgb_reset 16 32 48 >> $LOG 2>&1
 lcd "`date`" "Grove-LCD BLight" >> $LOG 2>&1
 sleep 5
