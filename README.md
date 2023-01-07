@@ -2,6 +2,8 @@
 
 I2C LCD Device Driver for Raspberry Pi, AQM0802A, AQM1602A, AQM1602Y, GROVE-LCD  
 
+Raspberry Pi : 1 or 2, 3, 4, Zero, Zero W, Zero W2
+
 ## Features  
 
 I2C interface signals SCL and SDA can be directly connected to Raspberry Pi.  
