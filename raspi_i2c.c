@@ -8,7 +8,7 @@ Arduino ESP32 用 ソフトウェア I2C LCD ドライバ soft_i2c
 Arduino標準ライブラリ「Wire」は使用していない(I2Cの手順の学習用サンプル)
 
 							 			Copyright (c) 2014-2023 Wataru KUNINO
-                               			https://bokunimo.net/raspi/
+							   			https://bokunimo.net/raspi/
 							 			https://bokunimo.net/bokunimowakaru/
 ********************************************************************************
 元ファイル：
@@ -24,13 +24,13 @@ https://github.com/bokunimowakaru/RaspberryPi/blob/master/libs/soft_i2c.c
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <stdint.h>						// uint32_t
-	#include <unistd.h>         			// usleep用
+	#include <unistd.h> 					// usleep用
 	#include <ctype.h>						// isprint用
 	#include <sys/time.h>					// gettimeofday用
 	#include <string.h>						// strncpy用
 #endif
 
-// #define RASPI_GPIO // 動作未確認。【動作速度が、かなり遅い】
+// #define RASPI_GPIO //【動作速度が、かなり遅い】
 
 #define I2C_lcd 0x3E						// LCD の I2C アドレス
 
@@ -50,9 +50,9 @@ https://github.com/bokunimowakaru/RaspberryPi/blob/master/libs/soft_i2c.c
 #else  // Raspberry Pi, Linux
 	#define	I2C_RAMDA	15				// I2C データシンボル長[us]
 #endif
-#define GPIO_RETRY  50      			// GPIO 切換え時のリトライ回数
-#define S_NUM       16      			// 文字列の最大長
-// #define DEBUG               			// デバッグモード
+#define GPIO_RETRY	50					// GPIO 切換え時のリトライ回数
+#define S_NUM		16					// 文字列の最大長
+// #define DEBUG			   			// デバッグモード
 #undef DEBUG
 // #define DEBUG_UTF8					// UTF8デバッグモード
 
@@ -78,7 +78,7 @@ int _micros(){
 		return ( UINT_MAX - micros_prev ) + micros_sec;
 	#else  // Raspberry Pi, Linux
 		int micros;
-		gettimeofday(&micros_time, NULL);    // time(&micros_time);
+		gettimeofday(&micros_time, NULL);	 // time(&micros_time);
 		micros = micros_time.tv_usec;
 		if(micros_prev > micros ) micros_sec++;
 		micros_prev = micros;
@@ -121,9 +121,9 @@ void i2c_debug(const char *s,byte priority){
 		#endif
 	#else // Raspberry Pi, Linux
 		if(priority>3)	fprintf(stderr,"[%10d] ERROR:%s\n",_micros(),s);
-	    #ifdef DEBUG
+		#ifdef DEBUG
 		else 			fprintf(stderr,"[%10d]      :%s\n",_micros(),s);
-	    #endif
+		#endif
 	#endif
 }
 
@@ -139,9 +139,9 @@ byte pinMode(char *port, char *mode){
 // 戻り値：０の時はエラー
   #ifdef RASPI_GPIO
 	char com_i[]="/usr/bin/raspi-gpio set 3 ip pu 2>/dev/null";
-	           // 01234567890123456789012345678901234567890123  44 bytes
+			   // 01234567890123456789012345678901234567890123	44 bytes
 	char com_o[]="/usr/bin/raspi-gpio set 3 op 2>/dev/null";
-	           // 01234567890123456789012345678901234567890     41 bytes
+			   // 01234567890123456789012345678901234567890 	41 bytes
 	com_i[24]=port[20];	// ポート番号は1桁にしか対応していない
 	com_o[24]=port[20];	// ポート番号は1桁にしか対応していない
 	if(mode[0] == INPUT[0]){
@@ -167,11 +167,11 @@ byte pinMode(char *port, char *mode){
   #else
 	int i=0;
 	char dir[]="/sys/class/gpio/gpio3/direction";
-	         // 01234567890123456789012345678901    22 Bytes
+			 // 01234567890123456789012345678901	22 Bytes
 	dir[20]=port[20];
-    #ifdef DEBUG
-    //	fprintf(stderr,"pinMode %s %s\n",dir,mode);
-    #endif
+	#ifdef DEBUG
+	//	fprintf(stderr,"pinMode %s %s\n",dir,mode);
+	#endif
 	while(i<GPIO_RETRY){
 		fgpio = fopen(dir, "w");
 		if(fgpio){
@@ -182,9 +182,9 @@ byte pinMode(char *port, char *mode){
 		delay(1);
 		i++;
 	}
-    #ifdef DEBUG
-    //	fprintf(stderr,"pinMode / GPIO_RETRY (%d/%d)\n",i,GPIO_RETRY);
-    #endif
+	#ifdef DEBUG
+	//	fprintf(stderr,"pinMode / GPIO_RETRY (%d/%d)\n",i,GPIO_RETRY);
+	#endif
   #endif
   return 0;
 }
@@ -218,16 +218,16 @@ byte digitalRead(char *port){
 	}
 	return 0;
   #else
-    fgpio = fopen(port, "r");
+	fgpio = fopen(port, "r");
 	if( fgpio ){
-	    fgets(buf, S_NUM, fgpio);
-	    fclose(fgpio);
+		fgets(buf, S_NUM, fgpio);
+		fclose(fgpio);
 	}
-    #ifdef DEBUG
-    //	fprintf(stderr,"digitalRead %s %s\n",port,buf);
-    #endif
+	#ifdef DEBUG
+	//	fprintf(stderr,"digitalRead %s %s\n",port,buf);
+	#endif
   #endif
-    return (byte)atoi(buf);
+	return (byte)atoi(buf);
 }
 #endif
 
@@ -236,7 +236,7 @@ byte digitalWrite(char *port, int value){
 // 戻り値：０の時はエラー
   #ifdef RASPI_GPIO
 	char com[]="/usr/bin/raspi-gpio set 3 dl 2>/dev/null";
-	         // 01234567890123456789012345678901234567890  41 bytes
+			 // 01234567890123456789012345678901234567890  41 bytes
 	com[24]=port[20];	// ポート番号は1桁にしか対応していない
 	if(value) com[27]='h';
 	#ifdef DEBUG
@@ -250,29 +250,29 @@ byte digitalWrite(char *port, int value){
 		return 1; // OK
 	}
   #else
-    fgpio = fopen(port, "w");
+	fgpio = fopen(port, "w");
 	if( fgpio ){
-	    fprintf(fgpio,"%d\n",value);
-	    fclose(fgpio);
-	    return 1;
+		fprintf(fgpio,"%d\n",value);
+		fclose(fgpio);
+		return 1;
 	}
-    #ifdef DEBUG
-    //	fprintf(stderr,"digitalWrite %s %d\n",port,value);
-    #endif
+	#ifdef DEBUG
+	//	fprintf(stderr,"digitalWrite %s %d\n",port,value);
+	#endif
   #endif
-    return 0;
+	return 0;
 }
 #endif
 
 #ifndef ARDUINO // Raspberry Pi, Linux
 byte i2c_hard_reset(int port){
 	// 戻り値：０の時はエラー
-  #ifdef RASPI_GPIO
+  #ifdef RASPI_GPIO  // 動作未確認
 	char com[]="/usr/bin/raspi-gpio set 00 dl 2>/dev/null";
-			//	012345678901234567890123456789012345678901  42 bytes
+			//	012345678901234567890123456789012345678901	42 bytes
 	if(port<1 || port>99) return 0;
 	com[24] = '\0';
-	snprintf(com,42,"%s%2d dl 2>/dev/null",com,port);
+	sprintf(com,"%s%2d dl 2>/dev/null",com,port);
 	#ifdef DEBUG
 		printf("%s\n",com);
 	#endif
@@ -285,7 +285,7 @@ byte i2c_hard_reset(int port){
 	
 	delay(10);
 	com[24] = '\0';
-	snprintf(com,42,"%s%2d dh 2>/dev/null",com,port);
+	sprintf(com,"%s%2d dh 2>/dev/null",com,port);
 	#ifdef DEBUG
 		printf("%s\n",com);
 	#endif
@@ -296,17 +296,90 @@ byte i2c_hard_reset(int port){
 		system(com);
 	}
 	delay(10);
+	return 1;
   #else
+	char dir[]="/sys/class/gpio/gpio00/direction";
+			 // 012345678901234567890123456789012	 33 Bytes
+	char com[]="/sys/class/gpio/gpio00/value";
+			 // 01234567890123456789012345678		 29 Bytes
+	int i;
+	if(port<10 || port>99) return 0; // error
+	dir[20]=(char)(port/10) + '0';	// port 1～9には対応しない
+	dir[21]=(char)(port%10) + '0';
+	com[20]=(char)(port/10) + '0';	// port 1～9には対応しない
+	com[21]=(char)(port%10) + '0';
+	
+	// GPIO初期化処理
+	#ifdef DEBUG
+	//	fprintf(stderr,"I2C_RESET IO Settiong %s out\n",dir);
+	#endif
+	fgpio = fopen("/sys/class/gpio/export","w");
+	if(fgpio==NULL ){
+		i2c_error("I2C_RESET / IO Settiong Error\n");
+		return 0;
+	}
+	fprintf(fgpio,"%d\n",port);
+	fclose(fgpio);
+	delay(10);
+
+	// pinMode = out 設定処理
+	#ifdef DEBUG
+	//	fprintf(stderr,"I2C_RESET pinMode %s out\n",dir);
+	#endif
+	fgpio = fopen(dir, "w");
+	if(fgpio){
+		fprintf(fgpio,"out");
+		fclose(fgpio);
+	}else{
+		i2c_error("I2C_RESET i2c_hard_reset");
+		i2c_error(dir);
+		i2c_error("the port is already used, or some hardware problems");
+		i2c_error("try: raspi-gpio set (port) ip");
+		return 0;
+	}
+	delay(1);
+
+	// digitalWrite = 0, Lレベル設定処理
+	#ifdef DEBUG
+	//	fprintf(stderr,"I2C_RESET digitalWrite %s %d\n",com,0);
+	#endif
+	fgpio = fopen(com, "w");
+	if( fgpio ){
+		fprintf(fgpio,"%d\n",0);
+		fclose(fgpio);
+	}else{
+		i2c_error("I2C_RESET fopen i2c_hard_reset (L)");
+		return 0;
+	}
+	delay(10);
+	
+	// digitalWrite = 1, Hレベル設定処理
+	#ifdef DEBUG
+	//	fprintf(stderr,"I2C_RESET digitalWrite %s %d\n",com,1);
+	#endif
+	fgpio = fopen(com, "w");
+	if( fgpio ){
+		fprintf(fgpio,"%d\n",1);
+		fclose(fgpio);
+	}else{
+		i2c_error("I2C_RESET fopen i2c_hard_reset (H)");
+		return 0;
+	}
+	delay(10);
+	return 0; // error
+  #endif
+//##############################################################################
+	/* RaspberryPi/gpio 使用(古い)
 	FILE *pp;
 	char buf[9];
 	char com[]="/home/pi/RaspberryPi/gpio/raspi_gpo 00 0 &> /dev/null";
-			//	012345678901234567890123456789012345678901234567890123  54 bytes
+			//	012345678901234567890123456789012345678901234567890123	54 bytes
 	if(port<1 || port>99) return 0;
 	com[36] = '\0';
-	snprintf(com,54,"%s%2d 0 &> /dev/null",com,port);
-	#ifdef DEBUG
+	sprintf(com,"%s%2d 0 &> /dev/null",com,port);
+//	#ifdef DEBUG
 		printf("%s\n",com);
-	#endif
+//	#endif
 	pp=popen(com,"r");
 	if(pp){
 		fgets(buf,8,pp);
@@ -318,7 +391,7 @@ byte i2c_hard_reset(int port){
 	}
 	delay(10);
 	com[36] = '\0';
-	snprintf(com,54,"%s%2d 1 &> /dev/null",com,port);
+	sprintf(com,"%s%2d 1 &> /dev/null",com,port);
 	#ifdef DEBUG
 		printf("%s\n",com);
 	#endif
@@ -332,8 +405,7 @@ byte i2c_hard_reset(int port){
 		}
 	}
 	delay(10);
-  #endif
-  return 1;
+	*/
 }
 #endif
 
@@ -386,11 +458,11 @@ byte i2c_SDA(byte level){
 byte i2c_tx(const byte in){
 // 戻り値：０の時はエラー
 	int i;
-    #ifdef DEBUG
-    	char s[32];
-		snprintf(s,32,"tx data = [%02X]",in);
+	#ifdef DEBUG
+		char s[32];
+		sprintf(s,"tx data = [%02X]",in);
 		i2c_log(s);
-    #endif
+	#endif
 	for(i=0;i<8;i++){
 		if( (in>>(7-i))&0x01 ){
 				i2c_SDA(1);					// (SDA)	H Imp
@@ -416,9 +488,9 @@ byte i2c_tx(const byte in){
 			return 0;
 		}
 	}
-    #ifdef DEBUG
-    //	fprintf(stderr,"i2c_tx / GPIO_RETRY (%d/%d)\n",GPIO_RETRY-i,GPIO_RETRY);
-    #endif
+	#ifdef DEBUG
+	//	fprintf(stderr,"i2c_tx / GPIO_RETRY (%d/%d)\n",GPIO_RETRY-i,GPIO_RETRY);
+	#endif
 	return (byte)i;
 }
 
@@ -428,15 +500,15 @@ byte i2c_init(void){
 
 	_micros_0();
 	i2c_log("I2C_Init");
-    for(i=0;i<2;i++){
+	for(i=0;i<2;i++){
 		fgpio = fopen("/sys/class/gpio/export","w");
-	    if(fgpio==NULL ){
-	        i2c_error("I2C_Init / IO Settiong Error\n");
-	        printf("9\n");
-	        return 0;
-	    }
-	    fprintf(fgpio,"%d\n",i + PORT_SDANUM);
-	    fclose(fgpio);
+		if(fgpio==NULL ){
+			i2c_error("I2C_Init / IO Settiong Error\n");
+			printf("9\n");
+			return 0;
+		}
+		fprintf(fgpio,"%d\n",i + PORT_SDANUM);
+		fclose(fgpio);
 	}
 	for(i=GPIO_RETRY;i>0;i--){						// リトライ50回まで
 		i2c_SDA(1);							// (SDA)	H Imp
@@ -446,9 +518,9 @@ byte i2c_init(void){
 		delay(1);
 	}
 	if(i==0) i2c_error("I2C_Init / Locked Lines");
-    #ifdef DEBUG
-    //	fprintf(stderr,"i2c_init / GPIO_RETRY (%d/%d)\n",GPIO_RETRY-i,GPIO_RETRY);
-    #endif
+	#ifdef DEBUG
+	//	fprintf(stderr,"i2c_init / GPIO_RETRY (%d/%d)\n",GPIO_RETRY-i,GPIO_RETRY);
+	#endif
 	_delayMicroseconds(I2C_RAMDA*8);
 	return (byte)i;
 }
@@ -457,22 +529,22 @@ byte i2c_close(void){
 // 戻り値：０の時はエラー
 	byte i;
 	i2c_log("i2c_close");
-    for(i=0;i<2;i++){
+	for(i=0;i<2;i++){
 		fgpio = fopen("/sys/class/gpio/unexport","w");
-	    if(fgpio==NULL ){
-	        fprintf(stderr,"IO Error\n");
-	        printf("9\n");
-	        return 0;
-	    }
-	    fprintf(fgpio,"%d\n",i + PORT_SDANUM);
-	    fclose(fgpio);
+		if(fgpio==NULL ){
+			fprintf(stderr,"IO Error\n");
+			printf("9\n");
+			return 0;
+		}
+		fprintf(fgpio,"%d\n",i + PORT_SDANUM);
+		fclose(fgpio);
 	}
 	return 1;
 }
 
 byte i2c_start(void){
 // 戻り値：０の時はエラー
-//	if(!i2c_init())return(0);				// SDA,SCL  H Out
+//	if(!i2c_init())return(0);				// SDA,SCL	H Out
 	int i;
 
 	for(i=GPIO_RETRY*100;i>0;i--){			// リトライ 50×100ms
@@ -685,7 +757,7 @@ void utf_del_uni(char *s){
 				else if(k < 0x30) s[i] = (char)(k + 0xC0);
 				else i -= 1;
 			}else{ // 小文字で代用
-				if((byte)s[i]==0x80)      s[i]=0xA0;
+				if((byte)s[i]==0x80)	  s[i]=0xA0;
 				else if((byte)s[i]==0x82) s[i]=0xA2;
 				else if((byte)s[i]==0x88) s[i]=0xA8;
 				else if((byte)s[i]==0x8A) s[i]=0xAA;
@@ -704,7 +776,7 @@ void utf_del_uni(char *s){
 				}
 			}
 		}else if((byte)s[i]==0xC2){
-			if((byte)s[i+1]==0xBF)      {i++; s[i]=0x9F;}
+			if((byte)s[i+1]==0xBF)		{i++; s[i]=0x9F;}
 			else if((byte)s[i+1]==0xA2) {i++; s[i]=0xE4;}
 			else if((byte)s[i+1]==0xA3) {i++; s[i]=0xE5;}
 			else if((byte)s[i+1]==0xA7) {i++; s[i]=0xE8;}
@@ -920,13 +992,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 /* functions to convert to and from system time */
 /* These are for interfacing with time serivces and are not normally needed in a sketch */
 // leap year calulator expects year argument as years offset from 1970
-//	static  const uint8_t monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31};
+//	static	const uint8_t monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31};
 // API starts months from 1, this array starts from 0
 //	void breakTime(time_t time, tmElements_t &tm){
 	// break the given time_t into time components
 	// this is a more compact version of the C library localtime function
 	// note that year is offset from 1970 !!!
-#define LEAP_YEAR(Y)     ( ((1970+Y)>0) && !((1970+Y)%4) && ( ((1970+Y)%100) || !((1970+Y)%400) ) )
+#define LEAP_YEAR(Y)	 ( ((1970+Y)>0) && !((1970+Y)%4) && ( ((1970+Y)%100) || !((1970+Y)%400) ) )
 void time2txt(char *date,unsigned long local){
 	int Year,year;
 	int Month,month, monthLength;
@@ -934,7 +1006,7 @@ void time2txt(char *date,unsigned long local){
 	int Second,Minute,Hour;
 //	int Wday;  // Sunday is day 1 
 	unsigned long days;
-	static  const uint8_t monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31};
+	static	const uint8_t monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31};
 	Second = local % 60;
 	local /= 60; // now it is minutes
 	Minute = local % 60;
@@ -967,12 +1039,12 @@ void time2txt(char *date,unsigned long local){
 		if (local >= (unsigned long)monthLength) {
 			local -= (unsigned long)monthLength;
 		} else {
-		    break;
+			break;
 		}
 	}
 	Year = year + 1970;
-	Month = month + 1;  // jan is month 1  
-	Day = local + 1;     // day of month
+	Month = month + 1;	// jan is month 1  
+	Day = local + 1;	 // day of month
 	snprintf(date,20,"%4d/%02d/%02d,%02d:%02d:%02d",Year,Month,Day,Hour,Minute,Second);
 }
 
@@ -1014,9 +1086,9 @@ void lcdPrint(const char *s){
 }
 
 void lcdPrint(String s){
-    char lcd[49];                               // 表示用変数を定義(49バイト48文字)
-    int len;                                    // 文字列長を示す整数型変数を定義
-    memset(lcd, 0, 49);                         // 文字列変数lcdの初期化(49バイト)
+	char lcd[49];								// 表示用変数を定義(49バイト48文字)
+	int len;									// 文字列長を示す整数型変数を定義
+	memset(lcd, 0, 49); 						// 文字列変数lcdの初期化(49バイト)
 	s.toCharArray(lcd, 49);
 	i2c_lcd_print(lcd);
 }
