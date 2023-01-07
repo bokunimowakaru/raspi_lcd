@@ -57,7 +57,7 @@ lcd_reset (){
     # fi
     echo >> $LOG 2>&1
     sleep 0.1
-    $LCD_APP -i -w${LCD_WIDTH} -r${LCD_IO} "LCD reset GPIO"${LCD_IO} > /dev/null 2>> $LOG
+    $LCD_APP -i -w${LCD_WIDTH} -r${LCD_IO} "LCD reset GPIO"${LCD_IO} > /dev/null 2>&1
     sleep 0.1
 }
 
