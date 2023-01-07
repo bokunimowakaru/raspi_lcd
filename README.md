@@ -72,11 +72,12 @@ I made it to display the radio channel name of the Internet radio, the artist an
 	  ./raspi_lcd -h
 	    options:
 	      -i      ignore I2C communication errors
-	      -f      use standard input
 	      -rPORT  set GPIO port number of reset LCD pin; number for PORT
 	      -wWIDTH set display digits; 8 or 16 for WITDH
 	      -yROW   set display row; 1 or 2 for ROW
 	      text... display text string on the LCD
+              -n      skip initializing LCD  
+	      -f      use standard input, continuously
 	      -h      show this help on the terminal
 
 ## Example Code (Bash Script)  
