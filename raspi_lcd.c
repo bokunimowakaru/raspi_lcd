@@ -110,19 +110,24 @@ int main(int argc,char **argv){
 		if( ERROR_CHECK ) return 1;
 	}
 //	if( !i2c_lcd_init() ){
-	if( !ROW ){
-		if( !NOINIT && !i2c_lcd_init_xy(WIDTH,2) ){
+	if( !ROW ){ // 1行目
+		if( PORT < 0 && NOINIT ) i2c_lcd_set_xy(WIDTH,2);
+		else if( !i2c_lcd_init_xy(WIDTH,2) ){
 			fprintf(stderr,"I2C ERROR in LCD_INIT\n");
 			if( ERROR_CHECK ) return 2;
 		}
 		if( !i2c_lcd_print(s) ){
-			fprintf(stderr,"I2C ERROR in LCD_PRINT\n");
+			fprintf(stderr,"I2C ERROR in LCD_PRINT row=1\n");
 			if( ERROR_CHECK ) return 3;
 		}
-	}else{
-		i2c_lcd_set_xy(WIDTH,2);
+	}else{		// 2行目が指定されている時
+		if( PORT < 0 || NOINIT )i2c_lcd_set_xy(WIDTH,2);
+		else if( !i2c_lcd_init_xy(WIDTH,2) ){
+			fprintf(stderr,"I2C ERROR in LCD_INIT\n");
+			if( ERROR_CHECK ) return 2;
+		}
 		if( !i2c_lcd_print2(s) ){
-			fprintf(stderr,"I2C ERROR in LCD_PRINT\n");
+			fprintf(stderr,"I2C ERROR in LCD_PRINT row=2\n");
 			if( ERROR_CHECK ) return 3;
 		}
 	}
