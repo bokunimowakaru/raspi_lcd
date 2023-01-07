@@ -32,12 +32,14 @@ int LOOP=0;							// オプション -f
 int PORT=-1;						// オプション -rPORT
 int WIDTH=8;						// オプション -wWIDTH
 int ROW=0;							// オプション -yROW
+int NOINIT=0;						// オプション -n
 
 int main(int argc,char **argv){
 	int num=1; char s[97]; s[0]='\0';
 	while(argc >=num+1 && argv[num][0]=='-'){
 		if(argv[num][1]=='i') ERROR_CHECK=0;
 		if(argv[num][1]=='f') LOOP=1;
+		if(argv[num][1]=='n') NOINIT=1;
 		if(argv[num][1]=='r'){
 			PORT=atoi(&argv[num][2]);
 			if( PORT == 0 && argc > num+1 ){
@@ -72,19 +74,21 @@ int main(int argc,char **argv){
 			printf("  %s -h\n\n",argv[0]);
 			printf("    options:\n");
 			printf("      -i      ignore I2C communication errors\n");
-			printf("      -f      use standard input, continuously\n");
 			printf("      -rPORT  set GPIO port number of reset LCD pin; number for PORT\n");
 			printf("      -wWIDTH set display digits; 8 or 16 for WITDH\n");
 			printf("      -yROW   set display row; 1 or 2 for ROW\n");
 			printf("      text... display text string on the LCD\n");
+			printf("      -n      skip initializing LCD\n");
+			printf("      -f      use standard input, continuously\n");
 			printf("      -h      display this help on the terminal\n\n");
 			printf("    オプション(in Japanese):\n");
 			printf("      -i      I2C通信のエラーを無視する\n");
-			printf("      -f      標準入力から待ち受けを行う（終了しない）\n");
 			printf("      -rPORT  液晶のリセット信号用GPIOポート番号\n");
 			printf("      -wWIDTH 液晶の表示桁数8または16\n");
 			printf("      -yROW   表示行1または2\n");
 			printf("      text... 表示したい文字列\n");
+			printf("      -n      液晶の初期化を実行しない\n");
+			printf("      -f      標準入力から待ち受けを行う（終了しない）\n");
 			printf("      -h      本ヘルプの表示\n");
 			return 0;
 		}
@@ -107,7 +111,7 @@ int main(int argc,char **argv){
 	}
 //	if( !i2c_lcd_init() ){
 	if( !ROW ){
-		if( !i2c_lcd_init_xy(WIDTH,2) ){
+		if( !NOINIT && !i2c_lcd_init_xy(WIDTH,2) ){
 			fprintf(stderr,"I2C ERROR in LCD_INIT\n");
 			if( ERROR_CHECK ) return 2;
 		}
