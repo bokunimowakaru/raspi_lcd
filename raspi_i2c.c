@@ -506,6 +506,7 @@ byte i2c_init(void){
 
 	_micros_0();
 	i2c_log("I2C_Init");
+	#ifndef ARDUINO  // ### for Raspberry Pi
 	for(i=0;i<2;i++){
 		fgpio = fopen("/sys/class/gpio/export","w");
 		if(fgpio==NULL ){
@@ -516,6 +517,7 @@ byte i2c_init(void){
 		fprintf(fgpio,"%d\n",i + PORT_SDANUM);
 		fclose(fgpio);
 	}
+	#endif
 	for(i=GPIO_RETRY;i>0;i--){						// リトライ50回まで
 		i2c_SDA(1);							// (SDA)	H Imp
 		i2c_SCL(1);							// (SCL)	H Imp
@@ -535,6 +537,7 @@ byte i2c_close(void){
 // 戻り値：０の時はエラー
 	byte i;
 	i2c_log("i2c_close");
+	#ifndef ARDUINO  // ### for Raspberry Pi
 	for(i=0;i<2;i++){
 		fgpio = fopen("/sys/class/gpio/unexport","w");
 		if(fgpio==NULL ){
@@ -545,6 +548,7 @@ byte i2c_close(void){
 		fprintf(fgpio,"%d\n",i + PORT_SDANUM);
 		fclose(fgpio);
 	}
+	#endif
 	return 1;
 }
 
@@ -818,7 +822,7 @@ void utf_del_uni(char *s){
 	#endif
 }
 
-	byte i2c_lcd_print(char *s);
+	byte i2c_lcd_print(const char *s);
 
 byte i2c_lcd_init(void){
 // 戻り値：０の時はエラー
@@ -879,7 +883,7 @@ void i2c_lcd_init_xy_sdascl(byte x,byte y,byte sda,byte scl){
 }
 #endif
 
-byte i2c_lcd_print(char *s){
+byte i2c_lcd_print(const char *s){
 // 戻り値：０の時はエラー
 	byte i,j;
 	char str[97];
@@ -908,7 +912,7 @@ byte i2c_lcd_print(char *s){
 	return !ret;
 }
 
-byte i2c_lcd_print2(char *s){
+byte i2c_lcd_print2(const char *s){
 // 戻り値：０の時はエラー
 	byte ret=0;
 	byte i;
@@ -970,7 +974,7 @@ byte i2c_lcd_print_ip2(uint32_t ip){
 	else return i2c_lcd_print(lcd);
 }
 
-byte i2c_lcd_print_val(char *s,int in){
+byte i2c_lcd_print_val(const char *s,int in){
 // 戻り値：０の時はエラー
 	byte ret=0;
 	char lcd[21];
@@ -1105,10 +1109,10 @@ void lcdPrint(const char *s){
 }
 
 void lcdPrint(String s){
-	char lcd[49];								// 表示用変数を定義(49バイト48文字)
+	char lcd[97];								// 表示用変数を定義(97バイト96文字)
 	int len;									// 文字列長を示す整数型変数を定義
-	memset(lcd, 0, 49); 						// 文字列変数lcdの初期化(49バイト)
-	s.toCharArray(lcd, 49);
+	memset(lcd, 0, 97); 						// 文字列変数lcdの初期化(97バイト)
+	s.toCharArray(lcd, 97);
 	i2c_lcd_print(lcd);
 }
 

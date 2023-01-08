@@ -58,11 +58,11 @@ void i2c_lcd_set_xy(byte x, byte y);
 #ifdef ARDUINO
     void i2c_lcd_init_xy_sdascl(byte x,byte y,byte sda,byte scl);
 #endif
-byte i2c_lcd_print(char *s);
-byte i2c_lcd_print2(char *s);
+byte i2c_lcd_print(const char *s);
+byte i2c_lcd_print2(const char *s);
 byte i2c_lcd_print_ip(uint32_t ip);
 byte i2c_lcd_print_ip2(uint32_t ip);
-byte i2c_lcd_print_val(char *s,int in);
+byte i2c_lcd_print_val(const char *s,int in);
 void time2txt(char *date,unsigned long local);
 byte i2c_lcd_print_time(unsigned long local);
 #ifdef ARDUINO // トランジスタ技術 2016.6 互換 API
