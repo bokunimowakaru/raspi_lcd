@@ -1,10 +1,10 @@
-# raspi_lcd  
+# raspi_lcd
 
 I2C LCD Device Driver for Raspberry Pi, AQM0802A, AQM1602A, AQM1602Y, GROVE-LCD  
 
 Raspberry Pi : 1 or 2, 3, 4, Zero, Zero W, Zero W2
 
-## Features  
+## Features
 
 I2C interface signals SCL and SDA can be directly connected to Raspberry Pi.  
 (It does not require an I2C repeater and pull-up resistors.)  
@@ -18,7 +18,7 @@ Select language to transrate this page:
 * [English(Anglais)](https://git.bokunimo.com/raspi_lcd/)
 * [French(Français)](https://translate.google.com/website?sl=en&tl=fr&hl&u=https://git.bokunimo.com/raspi_lcd/)
 
-## Schematics  
+## Schematics
 
 ![Schematic1](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/schematic.png?raw=true)
 
@@ -26,7 +26,7 @@ On the above Schematic, the power supply for the LCD is from GPIO16, to control 
 
 ![Schematic2](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/schematic2.png?raw=true)
 
-## Handmade Examples  
+## Handmade Examples
 
 The picture below shows it connected to the Raspberry Pi Zero. Other Raspberry Pi (1/2/3/4 etc.) can be connected in the same way.  
 
@@ -46,7 +46,7 @@ I made it to display the radio channel name of the Internet radio, the artist an
 
 ![Music](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/music.jpg?raw=true)
 
-## Install "raspi_lcd" to your Raspberry Pi  
+## Install "raspi_lcd" to your Raspberry Pi
 
 	$ cd ⏎
 	$ sudo apt install raspi-gpio ⏎ (for legacy OS)
@@ -56,12 +56,12 @@ I made it to display the radio channel name of the Internet radio, the artist an
 	$ make clean ⏎
 	$ make ⏎
 
-## Testing  
+## Testing
 
 	$ cd ~/raspi_lcd ⏎
 	$ ./raspi_lcd -i -w16 "Raspberry Pi LCD by bokunimo.net" ⏎
 
-## Usage  
+## Usage
 
 "-h" option shows usage:  
 
@@ -80,7 +80,7 @@ I made it to display the radio channel name of the Internet radio, the artist an
 	      -f      use standard input, continuously
 	      -h      show this help on the terminal
 
-## Example Code (Bash Script)  
+## Example Code (Bash Script)
 
 See [example.sh](https://github.com/bokunimowakaru/raspi_lcd/blob/master/example.sh) on GitHub.  
 
@@ -95,7 +95,7 @@ See [example.sh](https://github.com/bokunimowakaru/raspi_lcd/blob/master/example
 	2023/01/05 12:28:07 LCD 2023/01/05 12:28:04 / AQM1602A/Y/Grove
 	2023/01/05 12:28:15 LCD 01234567 / 8ｹﾀﾋｮｳｼﾞ
 
-## Example Code for Grove-LCD RGB Backlight  
+## Example Code for Grove-LCD RGB Backlight
 
 Grove-LCD RGB Backlight needs Backlight Controller "raspi_backlight" in "/raspi_lcd/grove_rgb/".  
 Please additionally install "raspi_backlight":  
@@ -131,7 +131,7 @@ The example code for Grove-LCD is in here: [raspi_lcd/grove_rgb/example.sh](http
 Tips:  
 Grove-LCD has I2C signal repeater, so the above script is enabled ACK checking function; no "-i" required for raspi_lcd options.  
 
-## Blog Pages  
+## Blog Pages
 
 I2C LCD AQM1602 0802 directly connect to Raspberry Pi
 * [https://bokunimo.net/blog/raspberry-pi/3253/](https://translate.google.com/website?sl=ja&tl=en&hl&u=https://bokunimo.net/blog/raspberry-pi/3253/)
@@ -142,7 +142,18 @@ Internet Radio and Jukebox on Raspberry Pi + DAC
 Example scripts for Apple Pi (produced by [BitTradeOne](https://bit-trade-one.co.jp/adcq1905/))
 * [https://bokunimo.net/blog/raspberry-pi/83/](https://translate.google.com/website?sl=ja&tl=en&hl&u=https://bokunimo.net/blog/raspberry-pi/83/)
 
-## GitHub Pages (This Document)  
+## Misc
+
+I also developed a driver which can display French fonts, for M5Atom and ESP32 based boards. You can download from below link:  
+
+for M5Atom and ESP32 Boards
+* [https://github.com/bokunimowakaru/m5/tree/master/atom/ex04_lcd](https://github.com/bokunimowakaru/m5/tree/master/atom/ex04_lcd)
+
+Following pictures are taken, when I tested it to copy text from French Wikipedia and paste to LCD controller on the web browser.  
+
+![M5Atom with I2C LCD](https://github.com/bokunimowakaru/m5/blob/master/pictures/ex04_lcd_site_atom_thumb.jpg?raw=true)
+
+## GitHub Pages (This Document)
 
 * [https://git.bokunimo.com/raspi_lcd/](https://git.bokunimo.com/raspi_lcd/)
 
