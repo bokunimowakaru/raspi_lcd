@@ -1,5 +1,5 @@
 /*******************************************************************************
-Raspberry Pi用 ソフトウェアI2C ライブラリ  raspi_i2c
+Raspberry Pi用 ソフトウェアI2C ライブラリ  raspi_i2c / soft_i2c
 Arduino ESP32 用 ソフトウェア I2C LCD ドライバ soft_i2c
 
 本ソースリストおよびソフトウェアは、ライセンスフリーです。(詳細は別記)
@@ -7,12 +7,15 @@ Arduino ESP32 用 ソフトウェア I2C LCD ドライバ soft_i2c
 
 Arduino標準ライブラリ「Wire」は使用していない(I2Cの手順の学習用サンプル)
 
-							 			Copyright (c) 2014-2023 Wataru KUNINO
-							   			https://bokunimo.net/raspi/
-							 			https://bokunimo.net/bokunimowakaru/
+										Copyright (c) 2014-2023 Wataru KUNINO
+										https://bokunimo.net/raspi/
+							 			https://bokunimo.net/
 ********************************************************************************
 元ファイル：
 https://github.com/bokunimowakaru/RaspberryPi/blob/master/libs/soft_i2c.c
+********************************************************************************
+最新ファイル：
+https://bokunimo.net/git/raspi_lcd/blob/master/raspi_i2c.h
 *******************************************************************************/
 
 //	通信の信頼性確保のため、戻り値の仕様を変更・統一しました。
@@ -103,7 +106,7 @@ void _delayMicroseconds(int i){
 	#endif
 }
 
-#ifndef ARDUINO // Raspberry Pi, Linux
+#ifndef ARDUINO // Raspberry Pi, Linux, Cygwin
 void delay(int i){
 	while(i){
 		_delayMicroseconds(1000);
@@ -134,7 +137,7 @@ void i2c_log(const char *s){
 	i2c_debug(s,1);
 }
 
-#ifndef ARDUINO // Raspberry Pi, Linux
+#ifndef ARDUINO // Raspberry Pi, Linux, Cygwin
 byte pinMode(char *port, char *mode){
 // 戻り値：０の時はエラー
   #ifdef RASPI_GPIO
@@ -164,6 +167,7 @@ byte pinMode(char *port, char *mode){
 			system(com_o);
 		}
 	}
+	return 1;
   #else
 	int i=0;
 	char dir[]="/sys/class/gpio/gpio3/direction";
@@ -185,17 +189,18 @@ byte pinMode(char *port, char *mode){
 	#ifdef DEBUG
 	//	fprintf(stderr,"pinMode / GPIO_RETRY (%d/%d)\n",i,GPIO_RETRY);
 	#endif
+	return 0;
   #endif
-  return 0;
 }
 #endif
 
 #ifndef ARDUINO // Raspberry Pi, Linux
 byte digitalRead(char *port){
+// 戻り値：読み値。エラー時は０（将来 -１に変更するかもしれない）
   #ifdef RASPI_GPIO
 	FILE *pp;
 	char buf[48];
-			// GPIO 3: level=1 fsel=0 func=INPUT\
+			// GPIO 3: level=1 fsel=0 func=INPUT
 			// 0123456789012345678901234567890122 34 bytes
 	char com[]="/usr/bin/raspi-gpio get 3 2> /dev/null";
 			//	012345678901234567890123456789012345678  39 bytes
@@ -249,6 +254,7 @@ byte digitalWrite(char *port, int value){
 		system(com);
 		return 1; // OK
 	}
+	return 0;  // エラー
   #else
 	fgpio = fopen(port, "w");
 	if( fgpio ){
@@ -259,8 +265,8 @@ byte digitalWrite(char *port, int value){
 	#ifdef DEBUG
 	//	fprintf(stderr,"digitalWrite %s %d\n",port,value);
 	#endif
+	return 0;  // エラー
   #endif
-	return 0;
 }
 #endif
 
@@ -302,7 +308,7 @@ byte i2c_hard_reset(int port){
 			 // 012345678901234567890123456789012	 33 Bytes
 	char com[]="/sys/class/gpio/gpio00/value";
 			 // 01234567890123456789012345678		 29 Bytes
-	int i;
+	// int i;
 	if(port<10 || port>99) return 0; // error
 	dir[20]=(char)(port/10) + '0';	// port 1～9には対応しない
 	dir[21]=(char)(port%10) + '0';
@@ -823,16 +829,24 @@ byte i2c_lcd_init(void){
 	byte data[2];
 
 	data[0]=0x00; data[1]=0x39; ret+=!i2c_write(I2C_lcd,data,2);	// IS=1
-//	data[0]=0x00; data[1]=0x11; ret+=!i2c_write(I2C_lcd,data,2);	// OSC=1
+	
 	data[0]=0x00; data[1]=0x14; ret+=!i2c_write(I2C_lcd,data,2);	// OSC=4
-//	data[0]=0x00; data[1]=0x70; ret+=!i2c_write(I2C_lcd,data,2);	// コントラスト	0x0
+//	data[0]=0x00; data[1]=0x11; ret+=!i2c_write(I2C_lcd,data,2);	// OSC=1
+
 	data[0]=0x00; data[1]=0x73; ret+=!i2c_write(I2C_lcd,data,2);	// コントラスト	0x3
-//	data[0]=0x00; data[1]=0x56; ret+=!i2c_write(I2C_lcd,data,2);	// Power/Cont	0x6
+//	data[0]=0x00; data[1]=0x70; ret+=!i2c_write(I2C_lcd,data,2);	// コントラスト	0x0
+
 	data[0]=0x00; data[1]=0x5E; ret+=!i2c_write(I2C_lcd,data,2);	// Power/Cont	0xE
+//	data[0]=0x00; data[1]=0x56; ret+=!i2c_write(I2C_lcd,data,2);	// Power/Cont	0x6
+
 	data[0]=0x00; data[1]=0x6C; ret+=!i2c_write(I2C_lcd,data,2);	// FollowerCtrl	0xC
+
 	delay(200);
+
 	data[0]=0x00; data[1]=0x38; ret+=!i2c_write(I2C_lcd,data,2);	// IS=0
+
 	data[0]=0x00; data[1]=0x0C; ret+=!i2c_write(I2C_lcd,data,2);	// DisplayON	0xC
+
 //	i2c_lcd_print("Hello!  I2C LCD by Wataru Kunino");
 	return !ret;
 }
@@ -840,7 +854,7 @@ byte i2c_lcd_init(void){
 byte i2c_lcd_init_xy(byte x, byte y){
 // 戻り値：０の時はエラー
 	#ifdef I2C_LCD_OFF
-		return;
+		return 1;
 	#endif
 	if(x==16||x==8||x==20) _lcd_size_x=x;
 	if(y==1 ||y==2) _lcd_size_y=y;
@@ -848,6 +862,9 @@ byte i2c_lcd_init_xy(byte x, byte y){
 }
 
 void i2c_lcd_set_xy(byte x, byte y){
+	#ifdef I2C_LCD_OFF
+		return;
+	#endif
 	if(x==16||x==8||x==20) _lcd_size_x=x;
 	if(y==1 ||y==2) _lcd_size_y=y;
 }
@@ -1046,6 +1063,8 @@ void time2txt(char *date,unsigned long local){
 	Month = month + 1;	// jan is month 1  
 	Day = local + 1;	 // day of month
 	snprintf(date,20,"%4d/%02d/%02d,%02d:%02d:%02d",Year,Month,Day,Hour,Minute,Second);
+	// warning: ‘%02d’ directive output may be truncated writing 2 bytes into a region of size between 0 and 3 [-Wformat-truncation=]
+	// %やabsで制限すれば回避できるが、誤表示となる解決にはならない。コード上で(ほぼ)配慮されているので無視。
 }
 
 byte i2c_lcd_print_time(unsigned long local){

@@ -12,8 +12,9 @@ I2C接続の小型液晶に文字を表示する
   -rPORT	液晶のリセット信号用GPIOポート番号
   -wWIDTH	液晶の表示桁数8または16
   -yROW		表示行1または2
-										Copyright (c) 2014-2017 Wataru KUNINO
+										Copyright (c) 2014-2023 Wataru KUNINO
 										https://bokunimo.net/raspi/
+							 			https://bokunimo.net/
 ********************************************************************************
 2022/12/25 raspi-gpio対応検討中【製作中・途中版】
 # (参考文献)GPIO用コマンド
@@ -21,11 +22,17 @@ I2C接続の小型液晶に文字を表示する
 ********************************************************************************
 元ファイル：
 https://github.com/bokunimowakaru/RaspberryPi/blob/master/gpio/raspi_lcd.c
+********************************************************************************
+最新ファイル：
+https://bokunimo.net/git/raspi_lcd/blob/master/raspi_lcd.c
+###################### 【要注意】"raspi_i2c.h"のパスを要確認 ###################
 *******************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "raspi_i2c.h"
+#include "raspi_i2c.h"  // ###################### 【要注意】パス確認 ############
+// #include "../libs/soft_i2c.h" // #############       元ファイル版 ############
+
 typedef unsigned char byte;
 extern int ERROR_CHECK;				// オプション -i
 int LOOP=0;							// オプション -f
