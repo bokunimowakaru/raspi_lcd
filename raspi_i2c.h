@@ -1,5 +1,6 @@
 /*******************************************************************************
-Raspberry Pi用 ソフトウェアI2C ライブラリ  soft_i2c
+Raspberry Pi用 ソフトウェア I2C ライブラリ raspi_i2c / soft_i2c
+Arduino ESP32 用 ソフトウェア I2C LCD ST7032i ドライバ soft_i2c
 
 本ソースリストおよびソフトウェアは、ライセンスフリーです。(詳細は別記)
 利用、編集、再配布等が自由に行えますが、著作権表示の改変は禁止します。
@@ -52,12 +53,17 @@ byte i2c_read(byte adr, byte *rx, byte len);
 byte i2c_write(byte adr, byte *tx, byte len);
 byte i2c_lcd_out(byte y,byte *lcd);
 void utf_del_uni(char *s);
+
+// LCD 初期化
 byte i2c_lcd_init(void);
 byte i2c_lcd_init_xy(byte x, byte y);
 void i2c_lcd_set_xy(byte x, byte y);
 #ifdef ARDUINO
     void i2c_lcd_init_xy_sdascl(byte x,byte y,byte sda,byte scl);
 #endif
+byte i2c_lcd_set_fonts(const byte *s, int len);
+
+// LCD 表示命令
 byte i2c_lcd_print(const char *s);
 byte i2c_lcd_print2(const char *s);
 byte i2c_lcd_print_ip(uint32_t ip);

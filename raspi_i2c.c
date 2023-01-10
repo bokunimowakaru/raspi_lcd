@@ -1,6 +1,6 @@
 /*******************************************************************************
-Raspberry Pi用 ソフトウェアI2C ライブラリ  raspi_i2c / soft_i2c
-Arduino ESP32 用 ソフトウェア I2C LCD ドライバ soft_i2c
+Raspberry Pi用 ソフトウェア I2C ライブラリ raspi_i2c / soft_i2c
+Arduino ESP32 用 ソフトウェア I2C LCD ST7032i ドライバ soft_i2c
 
 本ソースリストおよびソフトウェアは、ライセンスフリーです。(詳細は別記)
 利用、編集、再配布等が自由に行えますが、著作権表示の改変は禁止します。
@@ -16,6 +16,16 @@ https://github.com/bokunimowakaru/RaspberryPi/blob/master/libs/soft_i2c.c
 ********************************************************************************
 最新ファイル：
 https://bokunimo.net/git/raspi_lcd/blob/master/raspi_i2c.h
+********************************************************************************
+参考文献
+・秋月電子通商 I2C接続小型8文字×2行液晶 AQM0802A-RN-GBW
+　https://akizukidenshi.com/download/ds/xiamen/AQM0802.pdf
+・秋月電子通商 AE-AQM1602A(KIT)
+　https://akizukidenshi.com/download/ds/xiamen/AQM1602_rev2.pdf
+・Sitronix ST7032 Dot Matrix LCD Controller/Driver V1.4 2008/08/18 (Datasheet) 
+　https://akizukidenshi.com/download/ds/sitronix/st7032.pdf
+・Sitronix ST7032 Dot Matrix LCD Controller/Driver V1.3 2007/11/09 (Datasheet) 
+　https://akizukidenshi.com/download/ds/sitronix/ST7032-0Dv1_3.pdf
 *******************************************************************************/
 
 //	通信の信頼性確保のため、戻り値の仕様を変更・統一しました。
@@ -36,6 +46,9 @@ https://bokunimo.net/git/raspi_lcd/blob/master/raspi_i2c.h
 // #define RASPI_GPIO //【動作速度が、かなり遅い】
 
 #define I2C_lcd 0x3E						// LCD の I2C アドレス
+#define I2C_lcd_OSC			4				// OSC 0(低速)～7(高速)
+#define I2C_lcd_Contrast	33				// Cnt 0(淡)～63(濃)
+#define I2C_lcd_Booster		1				// Boost 0(OFF=5V時)～1(ON=3.3V時)
 
 #ifndef ARDUINO // Raspberry Pi, Linux
 	#define PORT_SCL	"/sys/class/gpio/gpio3/value"		// I2C SCLポート
@@ -289,7 +302,7 @@ byte i2c_hard_reset(int port){
 		system(com);
 	}
 	
-	delay(10);
+	delay(40);
 	com[24] = '\0';
 	sprintf(com,"%s%2d dh 2>/dev/null",com,port);
 	#ifdef DEBUG
@@ -301,7 +314,7 @@ byte i2c_hard_reset(int port){
 	}else{
 		system(com);
 	}
-	delay(10);
+	delay(40);
 	return 1;
   #else
 	char dir[]="/sys/class/gpio/gpio00/direction";
@@ -717,8 +730,8 @@ byte i2c_lcd_out(byte y,byte *lcd){
 		y=1;
 	}
 	ret += !i2c_write(I2C_lcd,data,2);
-	for(i=0;i<_lcd_size_x;i++){
-		if(lcd[i]==0x00) break;
+	if(!ret) for(i=0;i<_lcd_size_x;i++){
+		// if(lcd[i]==0x00) break;		// これだとCGRAMのフォント0が表示できないので削除
 		data[0]=0x40;
 		data[1]=lcd[i];
 		ret += !i2c_write(I2C_lcd,data,2);
@@ -830,19 +843,34 @@ byte i2c_lcd_init(void){
 		return;
 	#endif
 	byte ret=0;
+	/**************************** 8バイトをまとめて転送 ***********************/
+	//                 IS=1  OSC  Cnt  Pow   FC IS=0   ON
+	byte data[8]={0x00,0x39,0x14,0x70,0x50,0x6C,0x38,0x0C};	// 0x00 + コマンド7バイト
+	// ret+=!i2c_write(I2C_lcd,data,8); 	 // 仕様外(動作はする)
+	data[2] |= I2C_lcd_OSC & 0x07;			 // OSC 0(低速)～7(高速)
+	data[3] |= I2C_lcd_Contrast & 0x0F;		 // Cnt 6bitの下位4桁
+	data[4] |= (I2C_lcd_Contrast & 0x20)>>4; // Cnt 6bitの上位2桁
+	data[4] |= (I2C_lcd_Booster & 0x01)<<2;  // Boost 0(OFF=5V時)～1(ON=3.3V時)
+	
+	ret+=!i2c_write(I2C_lcd,data,6);
+	delay(200);
+	data[1]=data[6];
+	data[2]=data[7];
+	ret+=!i2c_write(I2C_lcd,data,3);
+	
+	/**************************** 一致ずつ転送する方法 *************************
 	byte data[2];
 
 	data[0]=0x00; data[1]=0x39; ret+=!i2c_write(I2C_lcd,data,2);	// IS=1
 	
-	data[0]=0x00; data[1]=0x14; ret+=!i2c_write(I2C_lcd,data,2);	// OSC=4
-//	data[0]=0x00; data[1]=0x11; ret+=!i2c_write(I2C_lcd,data,2);	// OSC=1
+	data[0]=0x00; data[1]=0x14; ret+=!i2c_write(I2C_lcd,data,2);	// OSC=4 標準180Hz
+//	data[0]=0x00; data[1]=0x11; ret+=!i2c_write(I2C_lcd,data,2);	// OSC=1 低速130Hz
 
 	data[0]=0x00; data[1]=0x73; ret+=!i2c_write(I2C_lcd,data,2);	// コントラスト	0x3
 //	data[0]=0x00; data[1]=0x70; ret+=!i2c_write(I2C_lcd,data,2);	// コントラスト	0x0
 
-	data[0]=0x00; data[1]=0x5E; ret+=!i2c_write(I2C_lcd,data,2);	// Power/Cont	0xE
-//	data[0]=0x00; data[1]=0x56; ret+=!i2c_write(I2C_lcd,data,2);	// Power/Cont	0x6
-
+	data[0]=0x00; data[1]=0x56; ret+=!i2c_write(I2C_lcd,data,2);	// Power/Cont	0x6
+                                                                    // 0x7だと背景が黒くなる
 	data[0]=0x00; data[1]=0x6C; ret+=!i2c_write(I2C_lcd,data,2);	// FollowerCtrl	0xC
 
 	delay(200);
@@ -852,6 +880,7 @@ byte i2c_lcd_init(void){
 	data[0]=0x00; data[1]=0x0C; ret+=!i2c_write(I2C_lcd,data,2);	// DisplayON	0xC
 
 //	i2c_lcd_print("Hello!  I2C LCD by Wataru Kunino");
+	*/
 	return !ret;
 }
 
@@ -882,6 +911,36 @@ void i2c_lcd_init_xy_sdascl(byte x,byte y,byte sda,byte scl){
 	i2c_lcd_init();
 }
 #endif
+
+byte i2c_lcd_set_fonts(const byte *s, int len){
+// 戻り値：０の時はエラー
+	byte ret=0;
+	int i,j;
+	byte data[9];
+	
+	if( len > 64) return 0;
+	/*
+	for(i=0;i<64;i+=8){
+		for(int j=0;j<8;j++) printf("%02x ",s[j+i]); printf("\n");
+	}
+	*/
+	for(i=0;i<len;i+=8){
+		data[0]= 0x00; // アドレス設定
+		data[1]= 0x40 + i; // アドレス設定
+		ret += !i2c_write(I2C_lcd, data, 2);	// CG-RAMのアドレス 0x40
+		data[0]= 0x40; // CG-RAM書き込み
+		memcpy(data+1, s+i, 8);
+		// for(j=0;j<9;j++) printf("%02x ",data[j]); printf("\n");
+		ret += !i2c_write(I2C_lcd, data, 9);	// CG-RAMへの転送
+	}
+	return !ret;
+	/*
+	lcd_i2c.writeto_mem(aqm1602, 0x00, bytes([0x40])) # CGRAM address
+	if dispScale == 0:                      # スケール表示なしの時
+	    for j in range(4):                  # LCD制御 フォント4文字の転送
+	        lcd_i2c.writeto_mem(aqm1602, 0x40, font_lv[0][j]) # フォント
+	*/
+}
 
 byte i2c_lcd_print(const char *s){
 // 戻り値：０の時はエラー
