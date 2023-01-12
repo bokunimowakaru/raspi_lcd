@@ -428,6 +428,33 @@ byte i2c_hard_reset(int port){
 }
 #endif
 
+#ifndef ARDUINO // Raspberry Pi, Linux
+byte i2c_hard_quit(int port){
+	byte ret = 0;
+	int i;
+	for(i=0;i<2;i++){
+		fgpio = fopen("/sys/class/gpio/unexport","w");
+		if(fgpio){
+			fprintf(fgpio,"%d\n",port);
+			fclose(fgpio);
+		}else{
+			i2c_error("I2C_Quit / i2c pin Error\n");
+			ret++;
+		}
+	}
+	
+	fgpio = fopen("/sys/class/gpio/unexport","w");
+	if(fgpio){
+		fprintf(fgpio,"%d\n",port);
+		fclose(fgpio);
+	}else{
+		i2c_error("I2C_Quit / reset pin Error\n");
+		ret++;
+	}
+	return !ret;
+}
+#endif
+
 #ifdef ARDUINO
 void i2c_SCL(byte level){
 	if( level ){

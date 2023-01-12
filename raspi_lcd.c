@@ -80,6 +80,16 @@ int main(int argc,char **argv){
 			printf("reset (%d)\n",PORT);
 			i2c_hard_reset(PORT);
 		}
+		if(argv[num][1]=='q'){
+			PORT=atoi(&argv[num][2]);
+			if( PORT == 0 && argc > num+1 ){
+				num++;
+				PORT = atoi(argv[num]);
+			}
+			printf("quit (%d)\n",PORT);
+			i2c_hard_quit(PORT);
+			return 0;
+		}
 		if(argv[num][1]=='w'){
 			WIDTH=atoi(&argv[num][2]);
 			if( WIDTH == 0 && argc > num+1 ){

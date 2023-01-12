@@ -36,6 +36,7 @@ void i2c_debug(const char *s,byte priority);
 void i2c_error(const char *s);
 #ifndef ARDUINO // ## for Raspberry Pi, Linux, Cygwin
     byte i2c_hard_reset(int port);
+    byte i2c_hard_quit(int port);
 #endif
 #ifdef ARDUINO
     void i2c_SCL(byte level);
