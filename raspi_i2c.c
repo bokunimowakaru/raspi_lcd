@@ -339,7 +339,7 @@ byte i2c_hard_reset(int port){
 	}
 	fprintf(fgpio,"%d\n",port);
 	fclose(fgpio);
-	delay(10);
+	delay(50);		// 28ms以上
 
 	// pinMode = out 設定処理
 	#ifdef DEBUG
