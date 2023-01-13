@@ -73,13 +73,16 @@ I made it to display the radio channel name of the Internet radio, the artist an
 	  ./raspi_lcd -h
 	    options:
 	      -i      ignore I2C communication errors
+	      -s      slowdown I2C communication mode
 	      -rPORT  set GPIO port number of reset LCD pin; number for PORT
 	      -wWIDTH set display digits; 8 or 16 for WITDH
 	      -yROW   set display row; 1 or 2 for ROW
+	      -l      display bar graph and values
 	      text... display text string on the LCD
-              -n      skip initializing LCD  
+	      -n      skip initializing LCD
 	      -f      use standard input, continuously
-	      -h      show this help on the terminal
+	      -qPORT  restore GPIO port and I2C ports
+	      -h      display this help on the terminal
 
 ## Example Code (Python Script)
 
