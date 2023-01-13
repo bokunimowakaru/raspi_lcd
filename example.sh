@@ -96,7 +96,7 @@ sleep 5
 echo `date` "Example for AQM1602A/Y/Grove ----------" >> $LOG 2>&1
 lcd "`date`" "AQM1602A/Y/Grove" >> $LOG 2>&1
 sleep 5
-lcd "0123456789ABCDEF" "16 ｹﾀ ﾏﾃﾞ ﾋｮｳｼﾞ" >> $LOG 2>&1
+lcd "0123456789ABCDEF" "16 ｹﾀ ﾏﾃﾞ ﾋｮｳｼﾞ!" >> $LOG 2>&1
 sleep 5
 
 echo `date` "Example for AQM0802A ------------------" >> $LOG 2>&1

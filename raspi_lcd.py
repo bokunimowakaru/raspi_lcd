@@ -6,11 +6,11 @@ import os
 import subprocess
 from time import sleep									# スリープ実行モジュールの取得
 
-restoreUsedGpio=False									# 使用したGPIOを終了時に開放する
 
 class RaspiLcd:
 
 	def __init__(self,ignoreError=False,x=16,reset=0):	# コンストラクタ作成
+		self.restoreUsedGpio = False					# 使用したGPIOを終了時に開放しない
 		self.title = "ﾎﾞｸﾆﾓﾜｶﾙ Rasp.Pi by bokunimo.net"
 		self.dir = os.path.dirname(__file__)
 		self.ignoreError = ignoreError
@@ -41,8 +41,9 @@ class RaspiLcd:
 			app.append('-i')
 		if self.width > 8:
 			app.append('-w'+str(self.width))
-		app.append('-y'+str(y))
-		if self.reset_port > 0:
+		if y == 2:
+			app.append('-y'+str(y))
+		elif self.reset_port > 0:
 			app.append('-r'+str(self.reset_port))
 		app.append(data)
 		# print(app)									# DEBUG app引数確認用
@@ -57,7 +58,7 @@ class RaspiLcd:
 		return ret
 
 	def __del__(self):									# インスタンスの削除
-		if restoreUsedGpio and self.reset_port > 0:
+		if self.restoreUsedGpio and self.reset_port > 0:
 			sleep(5)
 			path = self.dir + '/raspi_lcd'				# IR 受信ソフトモジュールのパス
 			app = [path, '-q'+str(self.reset_port)]		# ポートの開放
