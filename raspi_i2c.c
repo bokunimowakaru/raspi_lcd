@@ -84,6 +84,7 @@ https://bokunimo.net/git/raspi_lcd/blob/master/raspi_i2c.h
 	int micros_prev,micros_sec;
 #endif
 int ERROR_CHECK=1;								// 1:ACKを確認／0:ACKを無視する
+int SLOW_MODE=0;								// 0:高速転送／1:低速転送
 static byte _lcd_size_x=8;
 static byte _lcd_size_y=2;
 
@@ -302,7 +303,7 @@ byte i2c_hard_reset(int port){
 		system(com);
 	}
 	
-	delay(40);
+	delay(SLOW_MODE ? 40 : 1);
 	com[24] = '\0';
 	sprintf(com,"%s%2d dh 2>/dev/null",com,port);
 	#ifdef DEBUG
@@ -314,7 +315,7 @@ byte i2c_hard_reset(int port){
 	}else{
 		system(com);
 	}
-	delay(40);
+	delay(SLOW_MODE ? 40 : 1);
 	return 1;
   #else
 	char dir[]="/sys/class/gpio/gpio00/direction";
@@ -339,7 +340,8 @@ byte i2c_hard_reset(int port){
 	}
 	fprintf(fgpio,"%d\n",port);
 	fclose(fgpio);
-	delay(50);		// 28ms以上
+	
+	delay(SLOW_MODE ? 200 : 100);	// 28ms以上
 
 	// pinMode = out 設定処理
 	#ifdef DEBUG
@@ -370,7 +372,7 @@ byte i2c_hard_reset(int port){
 		i2c_error("I2C_RESET fopen i2c_hard_reset (L)");
 		return 0;
 	}
-	delay(10);
+	delay(SLOW_MODE ? 40 : 1);
 	
 	// digitalWrite = 1, Hレベル設定処理
 	#ifdef DEBUG
@@ -384,7 +386,7 @@ byte i2c_hard_reset(int port){
 		i2c_error("I2C_RESET fopen i2c_hard_reset (H)");
 		return 0;
 	}
-	delay(10);
+	delay(SLOW_MODE ? 40 : 1);
 	return 0; // error
   #endif
 //##############################################################################
@@ -746,7 +748,7 @@ byte i2c_lcd_out(byte y,byte *lcd){
 		Serial.println((char *)lcd);
 		return 1;
 	#endif
-	byte data[2];
+	byte data[9];
 	byte i;
 	byte ret=0;
 
@@ -756,16 +758,25 @@ byte i2c_lcd_out(byte y,byte *lcd){
 		data[1]=0xC0;
 		y=1;
 	}
-	ret += !i2c_write(I2C_lcd,data,2);
-	if(!ret) for(i=0;i<_lcd_size_x;i++){
-		// if(lcd[i]==0x00) break;		// これだとCGRAMのフォント0が表示できないので削除
-		data[0]=0x40;
-		data[1]=lcd[i];
+	if(!SLOW_MODE){
+		ret += !i2c_write(I2C_lcd, data, 2);
+		data[0]= 0x40; // 書き込みモード
+		for(i=0;i<_lcd_size_x;i+=8){
+			memcpy(data+1, lcd, 8);
+			ret += !i2c_write(I2C_lcd, data, 9);
+		}
+	}else{
 		ret += !i2c_write(I2C_lcd,data,2);
+		if(!ret) for(i=0;i<_lcd_size_x;i++){
+			// if(lcd[i]==0x00) break;		// これだとCGRAMのフォント0が表示できないので削除
+			data[0]=0x40;
+			data[1]=lcd[i];
+			ret += !i2c_write(I2C_lcd,data,2);
+		}
+		#ifdef DEBUG
+			if(ret)fprintf(stderr,"ERROR LOD_OUT Y=%d [%s]\n",y,lcd);
+		#endif
 	}
-	#ifdef DEBUG
-		if(ret)fprintf(stderr,"ERROR LOD_OUT Y=%d [%s]\n",y,lcd);
-	#endif
 	return !ret;
 }
 
@@ -873,41 +884,75 @@ byte i2c_lcd_init(void){
 	/**************************** 8バイトをまとめて転送 ***********************/
 	//                 IS=1  OSC  Cnt  Pow   FC IS=0   ON
 	byte data[8]={0x00,0x39,0x14,0x70,0x50,0x6C,0x38,0x0C};	// 0x00 + コマンド7バイト
-	// ret+=!i2c_write(I2C_lcd,data,8); 	 // 仕様外(動作はする)
+	
 	data[2] |= I2C_lcd_OSC & 0x07;			 // OSC 0(低速)～7(高速)
 	data[3] |= I2C_lcd_Contrast & 0x0F;		 // Cnt 6bitの下位4桁
 	data[4] |= (I2C_lcd_Contrast & 0x20)>>4; // Cnt 6bitの上位2桁
 	data[4] |= (I2C_lcd_Booster & 0x01)<<2;  // Boost 0(OFF=5V時)～1(ON=3.3V時)
-	
-	ret+=!i2c_write(I2C_lcd,data,6);
-	delay(200);
-	data[1]=data[6];
-	data[2]=data[7];
-	ret+=!i2c_write(I2C_lcd,data,3);
-	
-	/**************************** 一致ずつ転送する方法 *************************
-	byte data[2];
 
-	data[0]=0x00; data[1]=0x39; ret+=!i2c_write(I2C_lcd,data,2);	// IS=1
-	
-	data[0]=0x00; data[1]=0x14; ret+=!i2c_write(I2C_lcd,data,2);	// OSC=4 標準180Hz
-//	data[0]=0x00; data[1]=0x11; ret+=!i2c_write(I2C_lcd,data,2);	// OSC=1 低速130Hz
+	if(!SLOW_MODE){
+		ret+=!i2c_write(I2C_lcd,data,8); 	 // 仕様外(動作はする)
+		/********************************
+		 起動待ち時間ありの場合
+		*********************************
+		ret+=!i2c_write(I2C_lcd,data,6);
+		delay(200);
+		data[1]=data[6];
+		data[2]=data[7];
+		ret+=!i2c_write(I2C_lcd,data,3);
+		*********************************/
+	}else{
+		/**************************** 一致ずつ転送する方法 *************************/
+		ret+=!i2c_write(I2C_lcd,data,2);
+		_delayMicroseconds(I2C_RAMDA);
+		
+		data[1]=data[2];
+		ret+=!i2c_write(I2C_lcd,data,2);
+		_delayMicroseconds(I2C_RAMDA);
+		
+		data[1]=data[3];
+		ret+=!i2c_write(I2C_lcd,data,2);
+		_delayMicroseconds(I2C_RAMDA);
+		
+		data[1]=data[4];
+		ret+=!i2c_write(I2C_lcd,data,2);
+		_delayMicroseconds(I2C_RAMDA);
+		
+		data[1]=data[5];
+		ret+=!i2c_write(I2C_lcd,data,2);
+		delay(200);
+		
+		data[1]=data[6];
+		ret+=!i2c_write(I2C_lcd,data,2);
+		_delayMicroseconds(I2C_RAMDA);
+		
+		data[1]=data[7];
+		ret+=!i2c_write(I2C_lcd,data,2);
+		_delayMicroseconds(I2C_RAMDA);
 
-	data[0]=0x00; data[1]=0x73; ret+=!i2c_write(I2C_lcd,data,2);	// コントラスト	0x3
-//	data[0]=0x00; data[1]=0x70; ret+=!i2c_write(I2C_lcd,data,2);	// コントラスト	0x0
+		/* メモ
+			byte data[2];
+			
+			data[0]=0x00; data[1]=0x39; ret+=!i2c_write(I2C_lcd,data,2);	// (1) IS=1
+			
+			data[0]=0x00; data[1]=0x14; ret+=!i2c_write(I2C_lcd,data,2);	// (2) OSC=4 標準180Hz
+		//	data[0]=0x00; data[1]=0x11; ret+=!i2c_write(I2C_lcd,data,2);	//     OSC=1 低速130Hz
 
-	data[0]=0x00; data[1]=0x56; ret+=!i2c_write(I2C_lcd,data,2);	// Power/Cont	0x6
-                                                                    // 0x7だと背景が黒くなる
-	data[0]=0x00; data[1]=0x6C; ret+=!i2c_write(I2C_lcd,data,2);	// FollowerCtrl	0xC
+			data[0]=0x00; data[1]=0x73; ret+=!i2c_write(I2C_lcd,data,2);	// (3) コントラスト	0x3
+		//	data[0]=0x00; data[1]=0x70; ret+=!i2c_write(I2C_lcd,data,2);	//     コントラスト	0x0
 
-	delay(200);
+			data[0]=0x00; data[1]=0x56; ret+=!i2c_write(I2C_lcd,data,2);	// (4) Power/Cont	0x6
+		                                                                    //     0x7だと背景が黒くなる
+			data[0]=0x00; data[1]=0x6C; ret+=!i2c_write(I2C_lcd,data,2);	// (5) FollowerCtrl	0xC
 
-	data[0]=0x00; data[1]=0x38; ret+=!i2c_write(I2C_lcd,data,2);	// IS=0
+			delay(200);
 
-	data[0]=0x00; data[1]=0x0C; ret+=!i2c_write(I2C_lcd,data,2);	// DisplayON	0xC
+			data[0]=0x00; data[1]=0x38; ret+=!i2c_write(I2C_lcd,data,2);	// (6) IS=0
 
-//	i2c_lcd_print("Hello!  I2C LCD by Wataru Kunino");
-	*/
+			data[0]=0x00; data[1]=0x0C; ret+=!i2c_write(I2C_lcd,data,2);	// (7) DisplayON	0xC
+			*/
+		//	i2c_lcd_print("Hello!  I2C LCD by Wataru Kunino");
+	}
 	return !ret;
 }
 

@@ -45,6 +45,7 @@ https://bokunimo.net/git/raspi_lcd/blob/master/raspi_lcd.c
 
 typedef unsigned char byte;
 extern int ERROR_CHECK;				// オプション -i
+extern int SLOW_MODE;				// オプション -s
 int LOOP=0;							// オプション -f
 int PORT=-1;						// オプション -rPORT
 int WIDTH=8;						// オプション -wWIDTH
@@ -68,6 +69,7 @@ int main(int argc,char **argv){
 	char s[97]; s[0]='\0';
 	while(argc >=num+1 && argv[num][0]=='-'){
 		if(argv[num][1]=='i') ERROR_CHECK=0;
+		if(argv[num][1]=='s') SLOW_MODE=1;
 		if(argv[num][1]=='f') LOOP=1;
 		if(argv[num][1]=='n') NOINIT=1;
 		if(argv[num][1]=='l') BAR=1;
@@ -112,9 +114,11 @@ int main(int argc,char **argv){
 			printf("Usage:\n");
 			printf("  %s [-i] [-f] [-r port] [-w lcd_width] [-y row] [text...]\n",argv[0]);
 			printf("  echo text... | %s [-i] [-f] [-r port] [-w lcd_width] [-y row]\n",argv[0]);
-			printf("  %s -h\n\n",argv[0]);
+			printf("  %s -h # for help\n",argv[0]);
+			printf("  %s -q # for release I2C ports\n\n",argv[0]);
 			printf("    options:\n");
 			printf("      -i      ignore I2C communication errors\n");
+			printf("      -s      slowdown I2C communication mode\n");
 			printf("      -rPORT  set GPIO port number of reset LCD pin; number for PORT\n");
 			printf("      -wWIDTH set display digits; 8 or 16 for WITDH\n");
 			printf("      -yROW   set display row; 1 or 2 for ROW\n");
@@ -122,15 +126,18 @@ int main(int argc,char **argv){
 			printf("      text... display text string on the LCD\n");
 			printf("      -n      skip initializing LCD\n");
 			printf("      -f      use standard input, continuously\n");
+			printf("      -qPORT  restore GPIO port and I2C ports\n");
 			printf("      -h      display this help on the terminal\n\n");
 			printf("    オプション(in Japanese):\n");
 			printf("      -i      I2C通信のエラーを無視する\n");
 			printf("      -rPORT  液晶のリセット信号用GPIOポート番号\n");
 			printf("      -wWIDTH 液晶の表示桁数8または16\n");
 			printf("      -yROW   表示行1または2\n");
+			printf("      -l      レベルメータ表示\n");
 			printf("      text... 表示したい文字列\n");
 			printf("      -n      液晶の初期化を実行しない\n");
 			printf("      -f      標準入力から待ち受けを行う（終了しない）\n");
+			printf("      -qPORT  使用していたGPIOポートの開放\n");
 			printf("      -h      本ヘルプの表示\n");
 			return 0;
 		}
