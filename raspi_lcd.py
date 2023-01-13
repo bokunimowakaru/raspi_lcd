@@ -4,8 +4,8 @@
 import sys
 import os
 import subprocess
+import datetime
 from time import sleep									# スリープ実行モジュールの取得
-
 
 class RaspiLcd:
 
@@ -16,6 +16,8 @@ class RaspiLcd:
 		self.ignoreError = ignoreError
 		self.reset_port  = reset						# GPIO ポート番号
 		self.width = x									# LCD Digits
+		print(datetime.datetime.today().strftime('%Y/%m/%d %H:%M:%S'), end=' ') # 日時
+		print('LCD initialized')
 
 	def help(self):
 		path = self.dir + '/raspi_lcd'					# raspi_lcd モジュールのパス
@@ -24,6 +26,8 @@ class RaspiLcd:
 		data = res.stdout.decode().strip()				# 結果をdataへ代入
 		ret = res.returncode							# 終了コードをdataへ代入
 		if ret != 0:									# エラー時
+			print(datetime.datetime.today().strftime('%Y/%m/%d %H:%M:%S'), end=' ') # 日時
+			print('LCD ERROR in def help')
 			print('app =', app) 						# サブ起動する設定内容を表示
 			print('ret=', ret)							# 結果データを表示
 			print('data=', data)						# 結果データを表示
@@ -49,16 +53,25 @@ class RaspiLcd:
 		# print(app)									# DEBUG app引数確認用
 		res = subprocess.run(app,input=None,stdout=subprocess.PIPE)# サブプロセスとして起動
 		ret = res.returncode							# 終了コードをretへ代入
+		print(datetime.datetime.today().strftime('%Y/%m/%d %H:%M:%S'), end=' ') # 日時
 		if ret != 0:
 			data = res.stdout.decode().strip()			# 結果をdataへ代入
+			print('LCD ERROR in def print') 			# サブ起動する設定内容を表示
 			print('app =', app) 						# サブ起動する設定内容を表示
 			print('ret =', data)						# 結果データを表示
 			print('data=', data)						# 結果データを表示
-			raise Exception('ERROR: raspi_ir_out')
+			raise Exception('ERROR: print')
+		else:
+			if len(data) > self.width:
+				print('LCD', data[0:self.width], '/', data[self.width:2*self.width])
+			else:
+				print('LCD', data[0:self.width])
 		return ret
 
 	def __del__(self):									# インスタンスの削除
 		if self.restoreUsedGpio and self.reset_port > 0:
+			print(datetime.datetime.today().strftime('%Y/%m/%d %H:%M:%S'), end=' ') # 日時
+			print('LCD restore GPIO'+str(self.reset_port), 'to free')
 			sleep(5)
 			path = self.dir + '/raspi_lcd'				# IR 受信ソフトモジュールのパス
 			app = [path, '-q'+str(self.reset_port)]		# ポートの開放
@@ -67,7 +80,8 @@ class RaspiLcd:
 			if res.returncode != 0: 					# 終了コードを確認
 				print(res.stdout.decode().strip())		# 結果を表示
 				print('WARN: Failed to Disable Port',self.reset_port)
-		print("Done")
+		print(datetime.datetime.today().strftime('%Y/%m/%d %H:%M:%S'), end=' ') # 日時
+		print('LCD Done')
 
 def main():
 	s = ''

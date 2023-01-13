@@ -1,14 +1,15 @@
 # raspi_lcd
 
-I2C LCD Device Driver for Raspberry Pi, AQM0802A, AQM1602A, AQM1602Y, GROVE-LCD  
+I2C LCD Device Driver for Raspberry Pi, AQM0802A, AQM1602A, AQM1602Y, GROVE-LCD, and ST7032i  
 
-Raspberry Pi : 1 or 2, 3, 4, Zero, Zero W, Zero W2
+Supported Raspberry Pi: 1, 2, 3, 4, Zero, Zero W, Zero W2  
 
 ## Features
 
 I2C interface signals SCL and SDA can be directly connected to Raspberry Pi.  
 (It does not require an I2C repeater and pull-up resistors.)  
 Supports to display some Latin characters for French, and all of Japanese Katakana.  
+Python code examples are available. <span style="color: red; ">NEW!</span>  
 
 ## Language
 
@@ -79,6 +80,25 @@ I made it to display the radio channel name of the Internet radio, the artist an
               -n      skip initializing LCD  
 	      -f      use standard input, continuously
 	      -h      show this help on the terminal
+
+## Example Code (Python Script)
+
+See [example.py](https://github.com/bokunimowakaru/raspi_lcd/blob/master/example.py) on GitHub.  
+
+	pi@raspberrypi:~/raspi_lcd $ ./example.py
+	2023/01/13 23:22:34 LCD initialized
+	2023/01/13 23:22:34 Example for AQM1602A/Y/Grove ----------
+	2023/01/13 23:22:35 LCD 2023/01/13 23:22 / AQM1602A/Y/Grove
+	2023/01/13 23:22:41 LCD 0123456789ABCDEF
+	2023/01/13 23:22:41 LCD 16 ｹﾀ ﾏﾃﾞ ﾋｮｳｼﾞ!
+	2023/01/13 23:22:46 LCD Done
+	2023/01/13 23:22:46 LCD initialized
+	2023/01/13 23:22:46 Example for AQM0802A ------------------
+	2023/01/13 23:22:47 LCD 23:22:46 / AQM0802A
+	2023/01/13 23:22:53 LCD 01234567
+	2023/01/13 23:22:53 LCD 8ｹﾀﾋｮｳｼﾞ
+	2023/01/13 23:22:58 LCD restore GPIO16 to free
+	2023/01/13 23:23:03 LCD Done
 
 ## Example Code (Bash Script)
 
