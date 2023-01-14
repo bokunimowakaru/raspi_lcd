@@ -762,7 +762,7 @@ byte i2c_lcd_out(byte y,byte *lcd){
 		ret += !i2c_write(I2C_lcd, data, 2);
 		data[0]= 0x40; // 書き込みモード
 		for(i=0;i<_lcd_size_x;i+=8){
-			memcpy(data+1, lcd, 8);
+			memcpy(data+1, lcd + i, 8);
 			ret += !i2c_write(I2C_lcd, data, 9);
 		}
 	}else{
@@ -1004,6 +1004,7 @@ byte i2c_lcd_set_fonts(const byte *s, int len){
 		memcpy(data+1, s+i, 8);
 		// for(j=0;j<9;j++) printf("%02x ",data[j]); printf("\n");
 		ret += !i2c_write(I2C_lcd, data, 9);	// CG-RAMへの転送
+		// delay(1);
 	}
 	return !ret;
 	/*
