@@ -19,7 +19,7 @@ CPU_CORES=1
 SECONDS=0
 MEMS=(100 100 100 100 100 100 100 100)
 
-date4log4log (){
+date4log (){
     date +"%Y/%m/%d %H:%M:%S"
 }
 
