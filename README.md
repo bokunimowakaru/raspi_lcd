@@ -67,22 +67,27 @@ I made it to display the radio channel name of the Internet radio, the artist an
 "-h" option shows usage:  
 
 	$ ./raspi_lcd -h
-	Usage:
-	  ./raspi_lcd [-i] [-f] [-r port] [-w lcd_width] [-y row] [text...]
+	Usage: ./raspi_lcd (Version 1.01)
+	  ./raspi_lcd [-i] [-f] [-r port] [-w lcd_width] [-y row] text...
+	  ./raspi_lcd [-i] [-f] [-r port] [-w lcd_width] [-y row] [-b|-d] value...
 	  echo text... | ./raspi_lcd [-i] [-f] [-r port] [-w lcd_width] [-y row]
-	  ./raspi_lcd -h
+	  ./raspi_lcd -h # shows this help
+	  ./raspi_lcd -q # releases I2C ports
+
 	    options:
 	      -i      ignore I2C communication errors
 	      -s      slowdown I2C communication mode
 	      -rPORT  set GPIO port number of reset LCD pin; number for PORT
 	      -wWIDTH set display digits; 8 or 16 for WITDH
 	      -yROW   set display row; 1 or 2 for ROW
-	      -l      display bar graph and values
+	      -b      display bar graph
+	      -d      display dot graph
 	      text... display text string on the LCD
 	      -n      skip initializing LCD
 	      -f      use standard input, continuously
 	      -qPORT  restore GPIO port and I2C ports
 	      -h      display this help on the terminal
+	      -v      show version (for 1.01 and greater)
 
 ## Example Code (Python Script)
 
