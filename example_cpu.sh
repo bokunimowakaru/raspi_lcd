@@ -1,7 +1,7 @@
 #!/bin/bash
 ################################################################################
-# raspi_lcd サンプル・ソフトウェア
-#
+# raspi_lcd Version 1.01以降用 サンプル・ソフトウェア
+# LCD AQM0802 (8桁×2行)
 #                                       Copyright (c) 2022 - 2023 Wataru KUNINO
 ################################################################################
 
@@ -40,14 +40,14 @@ button_shutdown (){
     fi
     if [ $ret -eq 0 ]; then
         echo `date4log` "[WARNING] Pressed Shutdown Button"
-        /home/pi/RaspberryPi/gpio/raspi_lcd -i "ﾎﾞﾀﾝ_ｦ_ｵｼﾂﾂﾞｹﾙﾄ" "ｼｬｯﾄﾀﾞｳﾝ_ｼﾏｽ"
+        /home/pi/raspi_lcd/raspi_lcd -i "Pressed PowerBtn"
         sleep 2
         if [ $(($BUTTON_IO)) -gt 0 ]; then
             button
             ret=$?
         fi
         if [ $ret -eq 0 ]; then
-            /home/pi/RaspberryPi/gpio/raspi_lcd -i "Shuting down..." "Please wait"
+            /home/pi/raspi_lcd/raspi_lcd -i "Shuting down..."
             echo "shutdown -h now"
             sudo shutdown -h now
             exit 0
@@ -64,15 +64,20 @@ while [ $? -eq 0 ]; do
 done
 
 echo `date4log` "[Init] Connecting to LCD 起動中"
-/home/pi/RaspberryPi/gpio/raspi_lcd -i -b 0 >/dev/null
+/home/pi/raspi_lcd/raspi_lcd -i -b 0 >/dev/null
+i=100
+while [ $i -gt 4 ]; do
+    /home/pi/raspi_lcd/raspi_lcd -i -n -d $i >/dev/null
+    i=$(( i - 6 ))
+done
 i=4
 while [ $i -le 100 ]; do
-    /home/pi/RaspberryPi/gpio/raspi_lcd -i -n -b $i >/dev/null
+    /home/pi/raspi_lcd/raspi_lcd -i -n -b $i >/dev/null
     i=$(( i + 6 ))
 done
 i=96
 while [ $i -ge 0 ]; do
-    /home/pi/RaspberryPi/gpio/raspi_lcd -i -n -b $i >/dev/null
+    /home/pi/raspi_lcd/raspi_lcd -i -n -b $i >/dev/null
     i=$(( i - 6 ))
 done
 
@@ -83,8 +88,8 @@ while true; do
     echo `date4log` "[Loop] Clock 時計表示"
     hour=$((`date "+%_I"`))
     hour_pt=$(( ( ( $hour + 6 ) % 12 ) * 100 / 12 ))
-    /home/pi/RaspberryPi/gpio/raspi_lcd -i -n -b $hour_pt >/dev/null
-    /home/pi/RaspberryPi/gpio/raspi_lcd -y2 `date "+%R:%S"` >/dev/null
+    /home/pi/raspi_lcd/raspi_lcd -i -n -d $hour_pt >/dev/null
+    /home/pi/raspi_lcd/raspi_lcd -y2 `date "+%R:%S"` >/dev/null
     sleep 2
     button_shutdown
 
@@ -101,8 +106,8 @@ while true; do
     if [ $cpu_i -lt 0 ]; then # 負にならないがraspi_lcdが負値に非対応
         cpu_i=0
     fi
-    /home/pi/RaspberryPi/gpio/raspi_lcd -i -n -b $cpu_i >/dev/null
-    /home/pi/RaspberryPi/gpio/raspi_lcd -y2 "CPU" $cpu_f >/dev/null
+    /home/pi/raspi_lcd/raspi_lcd -i -n -b $cpu_i >/dev/null
+    /home/pi/raspi_lcd/raspi_lcd -y2 "CPU" $cpu_f >/dev/null
     sleep 2
     button_shutdown
 
@@ -119,8 +124,8 @@ while true; do
         echo `date4log` "[Caution] CPU温度が高くなっています。現在、"${temp_i}"℃です。"
         wall \($0\) "CPU Temperature =" ${temp_i}
     fi
-    /home/pi/RaspberryPi/gpio/raspi_lcd -i -n -b $temp_pt >/dev/null
-    /home/pi/RaspberryPi/gpio/raspi_lcd -y2 "TMP" $temp_i "C" >/dev/null
+    /home/pi/raspi_lcd/raspi_lcd -i -n -b $temp_pt >/dev/null
+    /home/pi/raspi_lcd/raspi_lcd -y2 "TMP" $temp_i "C" >/dev/null
     sleep 2
     button_shutdown
 
@@ -147,8 +152,8 @@ while true; do
             wall \($0\) "Used Memory =" ${mem_i}
         fi
     fi
-    /home/pi/RaspberryPi/gpio/raspi_lcd -i -n -b $mem_i >/dev/null
-    /home/pi/RaspberryPi/gpio/raspi_lcd -y2 "MEM" $mem_i "%" >/dev/null
+    /home/pi/raspi_lcd/raspi_lcd -i -n -b $mem_i >/dev/null
+    /home/pi/raspi_lcd/raspi_lcd -y2 "MEM" $mem_i "%" >/dev/null
     sleep 2
     button_shutdown
 
@@ -169,8 +174,8 @@ while true; do
             wall \($0\) "Used Memory =" ${mem_i}
         fi
     fi
-    /home/pi/RaspberryPi/gpio/raspi_lcd -i -n -b $sdcap_i >/dev/null
-    /home/pi/RaspberryPi/gpio/raspi_lcd -i -y2 "SSD" $sdcap_i "%" >/dev/null
+    /home/pi/raspi_lcd/raspi_lcd -i -n -b $sdcap_i >/dev/null
+    /home/pi/raspi_lcd/raspi_lcd -i -y2 "SSD" $sdcap_i "%" >/dev/null
     sleep 2
     button_shutdown
 done
