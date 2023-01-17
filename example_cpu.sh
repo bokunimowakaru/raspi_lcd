@@ -44,7 +44,6 @@ button (){
     fi
 }
 button_shutdown (){
-    ret=-1
     if [ $(($BUTTON_IO)) -gt 0 ]; then
         button
         if [ $? -eq 0 ]; then
