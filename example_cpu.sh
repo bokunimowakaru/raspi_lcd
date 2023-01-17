@@ -14,10 +14,14 @@
 #       @reboot /home/pi/raspi_lcd/example_cpu.sh &
 #
 
-BUTTON_IO="27"  # ボタンでシャットダウン(使用しないときは0)
-CPU_CORES=1
+BUTTON_IO="27"              # ボタンでシャットダウン(使用しないときは0)
+LCD_IO="16"                 # LCD用電源用IOポート番号を指定する
+LCD_APP="./raspi_lcd"       # LCD表示用。※要makeの実行
+LOG="/dev/stdout"           # ログファイル名(/dev/stdoutでコンソール表示)
+
 SECONDS=0
 MEMS=(100 100 100 100 100 100 100 100)
+CPU_CORES=`cat /proc/cpuinfo|grep "processor"|wc -l`
 
 date4log (){
     date +"%Y/%m/%d %H:%M:%S"
@@ -39,15 +43,15 @@ button_shutdown (){
         ret=$?
     fi
     if [ $ret -eq 0 ]; then
-        echo `date4log` "[WARNING] Pressed Shutdown Button"
-        /home/pi/raspi_lcd/raspi_lcd -i "Pressed PowerBtn"
+        echo `date4log` "[WARNING] Pressed Shutdown Button" >> $LOG 2>&1
+        $LCD_APP -i "Pressed PowerBtn"
         sleep 2
         if [ $(($BUTTON_IO)) -gt 0 ]; then
             button
             ret=$?
         fi
         if [ $ret -eq 0 ]; then
-            /home/pi/raspi_lcd/raspi_lcd -i "Shuting down..."
+            $LCD_APP -i "Shuting down..."
             echo "shutdown -h now"
             sudo shutdown -h now
             exit 0
@@ -57,85 +61,94 @@ button_shutdown (){
 
 button
 while [ $? -eq 0 ]; do
-    echo `date4log` "[Init] Waiting for GPIO Configuring ボタン状態を確認中"
+    echo `date4log` "[Init] Waiting for GPIO Configuring ボタン状態を確認中" >> $LOG 2>&1
     raspi-gpio set ${BUTTON_IO} ip pu
     sleep 1
     button
 done
 
-echo `date4log` "[Init] Connecting to LCD 起動中"
-/home/pi/raspi_lcd/raspi_lcd -i -b 0 >/dev/null
+echo `date4log` "[Init] Connecting to LCD 起動中" >> $LOG 2>&1
+sleep 0.1
+$LCD_APP -i -r${LCD_IO} "LC reset GPIO"${LCD_IO} > /dev/null
+sleep 0.1
+
+if [ $(( CPU_CORES )) -eq 0 ]; then
+    CPU_CORES=1
+fi
+echo `date4log` "[Init] CPU_CORES =" $CPU_CORES >> $LOG 2>&1
+
+$LCD_APP -i -b 0 >/dev/null
 i=100
 while [ $i -gt 4 ]; do
-    /home/pi/raspi_lcd/raspi_lcd -i -n -d $i >/dev/null
+    $LCD_APP -i -n -d $i >/dev/null
     i=$(( i - 6 ))
 done
 i=4
 while [ $i -le 100 ]; do
-    /home/pi/raspi_lcd/raspi_lcd -i -n -b $i >/dev/null
+    $LCD_APP -i -n -b $i >/dev/null
     i=$(( i + 6 ))
 done
 i=96
 while [ $i -ge 0 ]; do
-    /home/pi/raspi_lcd/raspi_lcd -i -n -b $i >/dev/null
+    $LCD_APP -i -n -b $i >/dev/null
     i=$(( i - 6 ))
 done
 
-echo `date4log` "[Init] Started Main Loop メイン処理を開始"
+echo `date4log` "[Init] Started Main Loop メイン処理を開始" >> $LOG 2>&1
 wall \($0\) "Started RasPi Monitor"
 while true; do
     # 時計
-    echo `date4log` "[Loop] Clock 時計表示"
+    echo `date4log` "[Loop] Clock 時計表示" >> $LOG 2>&1
     hour=$((`date "+%_I"`))
     hour_pt=$(( ( ( $hour + 6 ) % 12 ) * 100 / 12 ))
-    /home/pi/raspi_lcd/raspi_lcd -i -n -d $hour_pt >/dev/null
-    /home/pi/raspi_lcd/raspi_lcd -y2 `date "+%R:%S"` >/dev/null
+    $LCD_APP -i -n -d $hour_pt >/dev/null
+    $LCD_APP -y2 `date "+%R:%S"` >/dev/null
     sleep 2
     button_shutdown
 
     # UPTIME CPU負荷
-    echo `date4log` "[Loop] CPU Load 負荷表示"
+    echo `date4log` "[Loop] CPU Load 負荷表示" >> $LOG 2>&1
     cpu_f=`uptime|rev|cut -d',' -f3|tr -d ' '|rev|cut -d':' -f2`
     cpu100=`echo "${cpu_f} * 100 / ${CPU_CORES}"|bc`
     cpu_i=`printf "%.0f" $cpu100`
-    echo `date4log` "[Value] CPU =" ${cpu_i}
+    echo `date4log` "[Value] CPU =" ${cpu_i} >> $LOG 2>&1
     if [ $cpu_i -ge 80 ]; then
-        echo `date4log` "[Caution] CPU負荷が高くなっています。現在、"${cpu_i}"％です。"
+        echo `date4log` "[Caution] CPU負荷が高くなっています。現在、"${cpu_i}"％です。" >> $LOG 2>&1
         wall \($0\) "CPU Load =" ${cpu_i}
     fi
     if [ $cpu_i -lt 0 ]; then # 負にならないがraspi_lcdが負値に非対応
         cpu_i=0
     fi
-    /home/pi/raspi_lcd/raspi_lcd -i -n -b $cpu_i >/dev/null
-    /home/pi/raspi_lcd/raspi_lcd -y2 "CPU" $cpu_f >/dev/null
+    $LCD_APP -i -n -b $cpu_i >/dev/null
+    $LCD_APP -y2 "CPU" $cpu_f >/dev/null
     sleep 2
     button_shutdown
 
     # CPU Temperature
-    echo `date4log` "[Loop] CPU Temperature CPU温度表示"
+    echo `date4log` "[Loop] CPU Temperature CPU温度表示" >> $LOG 2>&1
     temp=`cat /sys/devices/virtual/thermal/thermal_zone0/temp`  # 温度を取得
     temp_i=$(( $temp / 1000 ))
-    echo `date4log` "[Value] TMP =" ${temp_i}
+    echo `date4log` "[Value] TMP =" ${temp_i} >> $LOG 2>&1
     temp_pt=$(( ( $temp - 40000 ) / 400 ))
     if [ $temp_pt -lt 0 ]; then # raspi_lcdが負値に非対応
         temp_pt=0
     fi
     if [ $temp_i -ge 80 ]; then
-        echo `date4log` "[Caution] CPU温度が高くなっています。現在、"${temp_i}"℃です。"
+        echo `date4log` "[Caution] CPU温度が高くなっています。現在、"${temp_i}"℃です。" >> $LOG 2>&1
         wall \($0\) "CPU Temperature =" ${temp_i}
     fi
-    /home/pi/raspi_lcd/raspi_lcd -i -n -b $temp_pt >/dev/null
-    /home/pi/raspi_lcd/raspi_lcd -y2 "TMP" $temp_i "C" >/dev/null
+    $LCD_APP -i -n -b $temp_pt >/dev/null
+    $LCD_APP -y2 "TMP" ${temp_i}"ﾟC" >/dev/null
     sleep 2
     button_shutdown
 
     # FREE メモリ容量
-    echo `date4log` "[Loop] Used Memory メモリ容量表示"
+    echo `date4log` "[Loop] Used Memory メモリ容量表示" >> $LOG 2>&1
     mem=`free|grep "Mem:"`
     mem_total=$((`echo $mem|awk '{print $2}'`))
     mem_avail=$((`echo $mem|awk '{print $7}'`))
     mem_i=$(( $mem_avail * 100 / $mem_total * -1 + 100 ))
-    echo `date4log` "[Value] MEM =" ${mem_i}
+    echo `date4log` "[Value] MEM =" ${mem_i} >> $LOG 2>&1
     if [ $mem_i -lt 0 ]; then # 負にならないがraspi_lcdが負値に非対応
         mem_i=0
     fi
@@ -145,37 +158,37 @@ while true; do
     fi
     if [ $mem_i -ge 90 ]; then
         if [ $mem_i -gt ${MEMS[1]} ]; then
-            echo `date4log` "[WARNING] メモリ使用量の異常事態です。現在、"${mem_i}"％です。"
+            echo `date4log` "[WARNING] メモリ使用量の異常事態です。現在、"${mem_i}"％です。" >> $LOG 2>&1
             wall \($0\) "[WARNING] Used Memory =" ${mem_i}
         else
-            echo `date4log` "[Caution] メモリ使用量が高くなっています。現在、"${mem_i}"％です"
+            echo `date4log` "[Caution] メモリ使用量が高くなっています。現在、"${mem_i}"％です" >> $LOG 2>&1
             wall \($0\) "Used Memory =" ${mem_i}
         fi
     fi
-    /home/pi/raspi_lcd/raspi_lcd -i -n -b $mem_i >/dev/null
-    /home/pi/raspi_lcd/raspi_lcd -y2 "MEM" $mem_i "%" >/dev/null
+    $LCD_APP -i -n -b $mem_i >/dev/null
+    $LCD_APP -y2 "MEM" ${mem_i}"%" >/dev/null
     sleep 2
     button_shutdown
 
     # DF SDカード容量
-    echo `date4log` "[Loop] Used SD Card SDカード容量表示"
+    echo `date4log` "[Loop] Used SD Card SDカード容量表示" >> $LOG 2>&1
     sdcap=`df | grep "/dev/root"|awk '{print $5}'|cut -d"%" -f1`
     sdcap_i=$(($sdcap))
-    echo `date4log` "[Value] SSD =" ${sdcap_i}
+    echo `date4log` "[Value] SSD =" ${sdcap_i} >> $LOG 2>&1
     if [ $sdcap_i -lt 0 ]; then
         sdcap_i=0
     fi
     if [ $sdcap_i -ge 60 ]; then
         if [ $sdcap_i -ge 90 ]; then
-            echo `date4log` "[WARNING] SDカード使用率の異常事態です。現在、"${sdcap_i}"です"
+            echo `date4log` "[WARNING] SDカード使用率の異常事態です。現在、"${sdcap_i}"です" >> $LOG 2>&1
             wall \($0\) "[WARNING] Used Memory =" ${mem_i}
         else
-            echo `date4log` "[Caution] SDカード使用率が"${sdcap_i}"％です"
+            echo `date4log` "[Caution] SDカード使用率が"${sdcap_i}"％です" >> $LOG 2>&1
             wall \($0\) "Used Memory =" ${mem_i}
         fi
     fi
-    /home/pi/raspi_lcd/raspi_lcd -i -n -b $sdcap_i >/dev/null
-    /home/pi/raspi_lcd/raspi_lcd -i -y2 "SSD" $sdcap_i "%" >/dev/null
+    $LCD_APP -i -n -b $sdcap_i >/dev/null
+    $LCD_APP -i -y2 "SSD" ${sdcap_i}"%" >/dev/null
     sleep 2
     button_shutdown
 done

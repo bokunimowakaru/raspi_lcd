@@ -27,8 +27,16 @@
 
 LCD_WIDTH="16"              # LCDの桁数 AQM0802は8桁、AQM1602は16桁
 LCD_IO="16"                 # LCD用電源用IOポート番号を指定する
-LCD_APP="/home/pi/raspi_lcd/raspi_lcd" # LCD表示用。※要makeの実行
+LCD_APP="./raspi_lcd"       # LCD表示用。※要makeの実行
 LOG="/dev/stdout"           # ログファイル名(/dev/stdoutでコンソール表示)
+
+if [ ! -x $LCD_APP ]; then
+    LCD_APP=`which raspi_lcd`
+    if [ ! -x $LCD_APP ]; then
+        LCD_APP="/home/pi/raspi_lcd/raspi_lcd"
+        if [ ! -x $LCD_APP ]; then
+            LCD_APP="/home/pi/RaspberryPi/gpio/raspi_lcd"
+fi fi fi
 
 # 日時表示用 8桁/16桁LCD用
 date (){
