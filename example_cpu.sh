@@ -95,7 +95,7 @@ while [ $i -ge 0 ]; do
 done
 
 echo `date4log` "[Init] Started Main Loop メイン処理を開始" >> $LOG 2>&1
-wall \($0\) "Started RasPi Monitor"
+#wall \($0\) "Started RasPi Monitor"
 while true; do
     # 時計
     echo `date4log` "[Loop] Clock 時計表示" >> $LOG 2>&1
@@ -152,18 +152,25 @@ while true; do
     if [ $mem_i -lt 0 ]; then # 負にならないがraspi_lcdが負値に非対応
         mem_i=0
     fi
-    if [ $SECONDS -ge 10800 ]; then #3時間経過
-        SECONDS=0
-        MEMS=(${MEMS[1]} ${MEMS[2]} ${MEMS[3]} ${MEMS[4]} ${MEMS[5]} ${MEMS[6]} ${MEMS[7]} $mem_i)
-    fi
     if [ $mem_i -ge 90 ]; then
-        if [ $mem_i -gt ${MEMS[1]} ]; then
+        MEMS_sum=`echo ${MEMS[*]}|tr " " "\n"|awk '{sum+=$1} END {print sum}'`
+        MEMS_ave=$(( MEMS_sum / ${#MEMS[*]} ))
+        if [ $mem_i -gt $MEMS_ave ]; then
             echo `date4log` "[WARNING] メモリ使用量の異常事態です。現在、"${mem_i}"％です。" >> $LOG 2>&1
             wall \($0\) "[WARNING] Used Memory =" ${mem_i}
         else
             echo `date4log` "[Caution] メモリ使用量が高くなっています。現在、"${mem_i}"％です" >> $LOG 2>&1
             wall \($0\) "Used Memory =" ${mem_i}
         fi
+    fi
+    if [ $SECONDS -ge 10800 ]; then #3時間経過
+        SECONDS=0
+        MEMS=(${MEMS[1]} ${MEMS[2]} ${MEMS[3]} ${MEMS[4]} ${MEMS[5]} ${MEMS[6]} ${MEMS[7]} $mem_i)
+        # unset MEMS[0]
+        # MEMS+=($mem_i)
+        MEMS_sum=`echo ${MEMS[*]}|tr " " "\n"|awk '{sum+=$1} END {print sum}'`
+        MEMS_ave=$(( MEMS_sum / ${#MEMS[*]} ))
+        echo `date4log` "[Calc] Average("${MEMS[*]}")=" $MEMS_ave >> $LOG 2>&1
     fi
     $LCD_APP -i -n -b $mem_i >/dev/null
     $LCD_APP -y2 "MEM" ${mem_i}"%" >/dev/null
