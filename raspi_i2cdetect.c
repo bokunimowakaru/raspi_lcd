@@ -15,20 +15,23 @@ I2Cアドレス8～119（0x00～0x77）の応答を確認し、表示します�
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
-#include <unistd.h>
+//#include <stdint.h>
+//#include <unistd.h>
 #include <string.h>
 // #include "../libs/soft_i2c.h"    // リポジトリ RaspberryPi用
 #include "raspi_i2c.h"              // リポジトリ raspi_lcd用
 typedef unsigned char byte; 
 
 int main(int argc,char **argv){
-    int i, num=0;
+    int i, argn=1, num=0, adr;
     byte ret;
-    if(argc >= 2 && argv[1][0]=='-' && argv[1][1]=='n') num=1;
+    if(argc >= 2 && argv[argn][0]=='-' && argv[argn][1]=='n'){
+        num=1;
+        argn++;
+    }
     if(!num){
-        printf("I2C Detector by W.Kunino\n");
-        printf("   https://goo.gl/Dmvh2z\n\n");
+        printf("I2C Detector (c) 2014 Wataru KUNINO\n");
+        printf("https://bokunimo.net/raspi/i2c.html\n\n");
     }
 
     ret=0;
@@ -37,9 +40,30 @@ int main(int argc,char **argv){
         if( ret==0 ){
             delay(100);
             i2c_close();
+            printf("ERROR %d\n",ret);
+            return ret;
         }
     }
-    for(i=8;i<120;i++){
+    if(argc >= 2){
+        for(i=argn;i<argc;i++){
+            ret=0;
+            adr=strtol(argv[i],NULL,16);
+            if(adr<8 || adr>119){
+                if(!num) printf("\nWARN i2c address %02X\n",adr);
+            }else{
+                ret=i2c_check(adr);
+            }
+            if(num){
+                if(ret){
+                    printf("%02X\n",adr);
+                    return 0;
+                }
+            }else{
+                if(ret) printf("%02X ",adr); else printf("-- ");
+            }
+        }
+        if(!num) printf("\n");
+    }else for(i=8;i<120;i++){
         ret=i2c_check(i);
         if(num){
             if(ret){
