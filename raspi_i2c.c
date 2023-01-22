@@ -45,11 +45,12 @@ https://bokunimo.net/git/raspi_lcd/blob/master/raspi_i2c.h
 
 // #define RASPI_GPIO //【動作速度が、かなり遅い】
 
-#define I2C_lcd_ini 0x3E					// LCD の I2C アドレス
+#define I2C_lcd_AQM 0x3E			// LCD ST7032 (AQM0802)の I2C アドレス
+#define I2C_lcd_NXP 0x27			// LCD PCF8574T PCF8574A の I2C アドレス
 // Slaver address could only set to 0111110, no other slaver address could be set
-#define I2C_lcd_OSC			4				// OSC 0(低速)～7(高速)
-#define I2C_lcd_Contrast	33				// Cnt 0(淡)～63(濃)
-#define I2C_lcd_Booster		1				// Boost 0(OFF=5V時)～1(ON=3.3V時)
+#define I2C_lcd_OSC			4		// OSC 0(低速)～7(高速)
+#define I2C_lcd_Contrast	33		// Cnt 0(淡)～63(濃)
+#define I2C_lcd_Booster		1		// Boost 0(OFF=5V時)～1(ON=3.3V時)
 
 #ifndef ARDUINO // Raspberry Pi, Linux
 	#define PORT_SCL	"/sys/class/gpio/gpio3/value"		// I2C SCLポート
@@ -87,7 +88,7 @@ https://bokunimo.net/git/raspi_lcd/blob/master/raspi_i2c.h
 int ERROR_CHECK=1;								// 1:ACKを確認／0:ACKを無視する
 int SLOW_MODE=0;								// 0:高速転送／1:低速転送
 
-static byte _I2C_lcd=I2C_lcd_ini;
+static byte _I2C_lcd=I2C_lcd_AQM;
 static byte _lcd_size_x=8;
 static byte _lcd_size_y=2;
 
@@ -745,6 +746,35 @@ byte i2c_write(byte adr, byte *tx, byte len){
 	return ret;
 }
 
+byte _i2c_4b_RegEnable_b = 2; 				// LCDのENピン用レジスタ位置 0～7
+
+byte _i2c_write_4b(byte adr, byte *tx, byte len, byte reg){
+// 戻り値：０の時はエラー
+	byte i,j,data[2],ret=0;
+	if(_i2c_4b_RegEnable_b < 4) reg &= 0x0F; else reg = (reg & 0x0F) << 4;
+	reg |= 1 << _i2c_4b_RegEnable_b;
+	for(i=0;i<len;i++){
+		if(_i2c_4b_RegEnable_b < 4){
+			data[0]=(tx[i] &  0xF0)| reg;
+			data[1]=(tx[i] << 4)| reg;
+		}else{
+			data[0]=(tx[i] >> 4)| reg;
+			data[1]=(tx[i] & 0x0F)| reg;
+		}
+		for(j=0;j<2;j++){
+			//printf("(%02X,",data[j]);
+			ret+=!i2c_write(adr, data+j, 1);
+			_delayMicroseconds(I2C_RAMDA);
+			data[j] &= ~(1 << _i2c_4b_RegEnable_b);	// enable H -> L
+			//printf("%02X)",data[j]);
+			ret+=!i2c_write(adr, data+j, 1);
+			_delayMicroseconds(I2C_RAMDA);
+		}
+		//printf("\n");
+	}
+	return (!ret) * len;
+}
+
 byte i2c_lcd_out(byte y,byte *lcd){
 // 戻り値：０の時はエラー
 	#ifdef I2C_LCD_OFF
@@ -752,7 +782,7 @@ byte i2c_lcd_out(byte y,byte *lcd){
 		return 1;
 	#endif
 	byte data[9];
-	byte i;
+	byte i,len=0;
 	byte ret=0;
 
 	data[0]=0x00;
@@ -761,26 +791,39 @@ byte i2c_lcd_out(byte y,byte *lcd){
 		data[1]=0xC0;
 		y=1;
 	}
-	if(!SLOW_MODE){
-		ret += !i2c_write(_I2C_lcd, data, 2);
-		data[0]= 0x40; // 書き込みモード
-		for(i=0;i<_lcd_size_x;i+=8){
-			memcpy(data+1, lcd + i, 8);
-			ret += !i2c_write(_I2C_lcd, data, 9);
-		}
-	}else{
-		ret += !i2c_write(_I2C_lcd,data,2);
-		if(!ret) for(i=0;i<_lcd_size_x;i++){
-			// if(lcd[i]==0x00) break;		// これだとCGRAMのフォント0が表示できないので削除
-			data[0]=0x40;
-			data[1]=lcd[i];
+	if(_I2C_lcd == I2C_lcd_AQM){			// LCD ST7032 (AQM0802)
+		if(!SLOW_MODE){
+			ret += !i2c_write(_I2C_lcd, data, 2);
+			data[0]= 0x40; // 書き込みモード
+			for(i=0;i<_lcd_size_x;i+=8){
+				memcpy(data+1, lcd + i, 8);
+				ret += !i2c_write(_I2C_lcd, data, 9);
+				len++;
+			}
+		}else{
 			ret += !i2c_write(_I2C_lcd,data,2);
+			if(!ret) for(i=0;i<_lcd_size_x;i++){
+				// if(lcd[i]==0x00) break;		// これだとCGRAMのフォント0が表示できないので削除
+				data[0]=0x40;
+				data[1]=lcd[i];
+				ret += !i2c_write(_I2C_lcd,data,2);
+				len++;
+			}
+			#ifdef DEBUG
+				if(ret)fprintf(stderr,"ERROR LOD_OUT Y=%d [%s]\n",y,lcd);
+			#endif
 		}
-		#ifdef DEBUG
-			if(ret)fprintf(stderr,"ERROR LOD_OUT Y=%d [%s]\n",y,lcd);
-		#endif
+	}else{	// LCD PCF8574T PCF8574A
+			printf("debug: HD44780 + PCF8574T LCD (%02X) %s\n",data[1],lcd);
+			ret += !_i2c_write_4b(_I2C_lcd,data+1,1,0x0C);
+			if(!ret) for(i=0;i<_lcd_size_x;i++){
+				ret += !_i2c_write_4b(_I2C_lcd,lcd+i,1,0x0D);
+				len++;
+			}else{
+				if(ret)fprintf(stderr,"ERROR LOD_OUT Y=%d [%s]\n",y,lcd);
+			}
 	}
-	return !ret;
+	return (!ret) * len;
 }
 
 const char _utf_C3_x80x90xE0[]={
@@ -897,68 +940,128 @@ byte i2c_lcd_init(void){
 	data[4] |= (I2C_lcd_Contrast & 0x20)>>4; // Cnt 6bitの上位2桁
 	data[4] |= (I2C_lcd_Booster & 0x01)<<2;  // Boost 0(OFF=5V時)～1(ON=3.3V時)
 
-	if(!SLOW_MODE){
-		ret+=!i2c_write(_I2C_lcd,data,8); 	 // 仕様外(動作はする)
-		/********************************
-		 起動待ち時間ありの場合
-		*********************************
-		ret+=!i2c_write(_I2C_lcd,data,6);
-		delay(200);
-		data[1]=data[6];
-		data[2]=data[7];
-		ret+=!i2c_write(_I2C_lcd,data,3);
-		*********************************/
-	}else{
-		/**************************** 一致ずつ転送する方法 *************************/
-		ret+=!i2c_write(_I2C_lcd,data,2);
-		_delayMicroseconds(I2C_RAMDA);
-		
-		data[1]=data[2];
-		ret+=!i2c_write(_I2C_lcd,data,2);
-		_delayMicroseconds(I2C_RAMDA);
-		
-		data[1]=data[3];
-		ret+=!i2c_write(_I2C_lcd,data,2);
-		_delayMicroseconds(I2C_RAMDA);
-		
-		data[1]=data[4];
-		ret+=!i2c_write(_I2C_lcd,data,2);
-		_delayMicroseconds(I2C_RAMDA);
-		
-		data[1]=data[5];
-		ret+=!i2c_write(_I2C_lcd,data,2);
-		delay(200);
-		
-		data[1]=data[6];
-		ret+=!i2c_write(_I2C_lcd,data,2);
-		_delayMicroseconds(I2C_RAMDA);
-		
-		data[1]=data[7];
-		ret+=!i2c_write(_I2C_lcd,data,2);
-		_delayMicroseconds(I2C_RAMDA);
-
-		/* メモ
-			byte data[2];
-			
-			data[0]=0x00; data[1]=0x39; ret+=!i2c_write(_I2C_lcd,data,2);	// (1) IS=1
-			
-			data[0]=0x00; data[1]=0x14; ret+=!i2c_write(_I2C_lcd,data,2);	// (2) OSC=4 標準180Hz
-		//	data[0]=0x00; data[1]=0x11; ret+=!i2c_write(_I2C_lcd,data,2);	//     OSC=1 低速130Hz
-
-			data[0]=0x00; data[1]=0x73; ret+=!i2c_write(_I2C_lcd,data,2);	// (3) コントラスト	0x3
-		//	data[0]=0x00; data[1]=0x70; ret+=!i2c_write(_I2C_lcd,data,2);	//     コントラスト	0x0
-
-			data[0]=0x00; data[1]=0x56; ret+=!i2c_write(_I2C_lcd,data,2);	// (4) Power/Cont	0x6
-		                                                                    //     0x7だと背景が黒くなる
-			data[0]=0x00; data[1]=0x6C; ret+=!i2c_write(_I2C_lcd,data,2);	// (5) FollowerCtrl	0xC
-
+	if(_I2C_lcd == I2C_lcd_AQM){			// LCD ST7032 (AQM0802)
+		if(!SLOW_MODE){
+			ret+=!i2c_write(_I2C_lcd,data,8); 	// 仕様外(動作はする)
+			/********************************
+			 起動待ち時間ありの場合
+			*********************************
+			ret+=!i2c_write(_I2C_lcd,data,6);
 			delay(200);
+			data[1]=data[6];
+			data[2]=data[7];
+			ret+=!i2c_write(_I2C_lcd,data,3);
+			*********************************/
+		}else{
+			/**************************** 一致ずつ転送する方法 *************************/
+			ret+=!i2c_write(_I2C_lcd,data,2);
+			_delayMicroseconds(I2C_RAMDA);
+			
+			data[1]=data[2];
+			ret+=!i2c_write(_I2C_lcd,data,2);
+			_delayMicroseconds(I2C_RAMDA);
+			
+			data[1]=data[3];
+			ret+=!i2c_write(_I2C_lcd,data,2);
+			_delayMicroseconds(I2C_RAMDA);
+			
+			data[1]=data[4];
+			ret+=!i2c_write(_I2C_lcd,data,2);
+			_delayMicroseconds(I2C_RAMDA);
+			
+			data[1]=data[5];
+			ret+=!i2c_write(_I2C_lcd,data,2);
+			delay(200);
+			
+			data[1]=data[6];
+			ret+=!i2c_write(_I2C_lcd,data,2);
+			_delayMicroseconds(I2C_RAMDA);
+			
+			data[1]=data[7];
+			ret+=!i2c_write(_I2C_lcd,data,2);
+			_delayMicroseconds(I2C_RAMDA);
 
-			data[0]=0x00; data[1]=0x38; ret+=!i2c_write(_I2C_lcd,data,2);	// (6) IS=0
+			/* メモ
+				byte data[2];
+				
+				data[0]=0x00; data[1]=0x39; ret+=!i2c_write(_I2C_lcd,data,2);	// (1) IS=1
+				
+				data[0]=0x00; data[1]=0x14; ret+=!i2c_write(_I2C_lcd,data,2);	// (2) OSC=4 標準180Hz
+			//	data[0]=0x00; data[1]=0x11; ret+=!i2c_write(_I2C_lcd,data,2);	//     OSC=1 低速130Hz
 
-			data[0]=0x00; data[1]=0x0C; ret+=!i2c_write(_I2C_lcd,data,2);	// (7) DisplayON	0xC
-			*/
-		//	i2c_lcd_print("Hello!  I2C LCD by Wataru Kunino");
+				data[0]=0x00; data[1]=0x73; ret+=!i2c_write(_I2C_lcd,data,2);	// (3) コントラスト	0x3
+			//	data[0]=0x00; data[1]=0x70; ret+=!i2c_write(_I2C_lcd,data,2);	//     コントラスト	0x0
+
+				data[0]=0x00; data[1]=0x56; ret+=!i2c_write(_I2C_lcd,data,2);	// (4) Power/Cont	0x6
+			                                                                    //     0x7だと背景が黒くなる
+				data[0]=0x00; data[1]=0x6C; ret+=!i2c_write(_I2C_lcd,data,2);	// (5) FollowerCtrl	0xC
+
+				delay(200);
+
+				data[0]=0x00; data[1]=0x38; ret+=!i2c_write(_I2C_lcd,data,2);	// (6) IS=0
+
+				data[0]=0x00; data[1]=0x0C; ret+=!i2c_write(_I2C_lcd,data,2);	// (7) DisplayON	0xC
+				*/
+			//	i2c_lcd_print("Hello!  I2C LCD by Wataru Kunino");
+		}
+	}else{	// LCD PCF8574T PCF8574A
+		//printf("debug: HD44780 + PCF8574T L, L, 0x3, Initial 1st Function Set, wait 4.1ms->5ms\n");
+		data[0]=0x3C; ret+=!i2c_write(_I2C_lcd,data,1); data[0] &= 0xFB; ret+=!i2c_write(_I2C_lcd,data,1); delay(5); 
+		//printf("debug: HD44780 + PCF8574T L, L, 0x3, Initial 2nd Function Set, wait 100us\n");
+		data[0]=0x3C; ret+=!i2c_write(_I2C_lcd,data,1); data[0] &= 0xFB; ret+=!i2c_write(_I2C_lcd,data,1); _delayMicroseconds(100);
+		//printf("debug: HD44780 + PCF8574T L, L, 0x3, Initial 3rd Function Set\n");
+		data[0]=0x3C; ret+=!i2c_write(_I2C_lcd,data,1); data[0] &= 0xFB; ret+=!i2c_write(_I2C_lcd,data,1); _delayMicroseconds(100);
+		//printf("debug: HD44780 + PCF8574T L, L, 0x2, set if mode to 4bit\n");
+		data[0]=0x2C; ret+=!i2c_write(_I2C_lcd,data,1); data[0] &= 0xFB; ret+=!i2c_write(_I2C_lcd,data,1); _delayMicroseconds(250);
+
+		//printf("debug: HD44780 + PCF8574T L, L, 0x28, Function Set\n");
+		data[0]=0x28; ret+=!_i2c_write_4b(_I2C_lcd,data,1,0x0C);
+		//printf("debug: HD44780 + PCF8574T L, L, 0x08, Display OFF\n");
+		data[0]=0x08; ret+=!_i2c_write_4b(_I2C_lcd,data,1,0x0C);
+		//printf("debug: HD44780 + PCF8574T L, L, 0x01, Clear Display\n");
+		data[0]=0x01; ret+=!_i2c_write_4b(_I2C_lcd,data,1,0x0C); delay(2);
+		//printf("debug: HD44780 + PCF8574T L, L, 0x06, Entry Mode\n");
+		data[0]=0x06; ret+=!_i2c_write_4b(_I2C_lcd,data,1,0x0C); delay(1);
+		//printf("debug: HD44780 + PCF8574T L, L, 0x0C, Display ON\n");
+		data[0]=0x0C; ret+=!_i2c_write_4b(_I2C_lcd,data,1,0x0C); delay(1);
+		//printf("debug: %d errors\n", ret);
+		
+		/* BASIC版 ドライバ 2016年7月15日 https://bokunimo.net/blog/ichigo-jam/118/
+		
+		data[0]=0x28; ret+=!_i2c_write_4b(_I2C_lcd,data,1,0x0C); delay(1);
+		data[0]=0x0C; ret+=!_i2c_write_4b(_I2C_lcd,data,1,0x0C); delay(1);
+		data[0]=0x01; ret+=!_i2c_write_4b(_I2C_lcd,data,1,0x0C); delay(2);
+		data[0]=0x06; ret+=!_i2c_write_4b(_I2C_lcd,data,1,0x0C); delay(1);
+
+			https://github.com/bokunimowakaru/MJ/blob/gh-pages/pg05/2.txt
+			800 ‘INI
+			810 Q=60:gsb990:gsb990:gsb990	' 0x3C 0x3C 0x3C
+			820 Q=44:gsb990:gsb990			' 0x2C 0x2C
+			830 Q=#8C:gsb990:Q=12:gsb990	' 0x8C 0x0C ''0x28''
+			840 Q=#CC:gsb990:Q=12:gsb990	' 0xCC 0x0C ''0x0C''
+			850 Q=28:gsb990:Q=12:gsb990		' 0x1C 0x0C ''0x01''
+			860 Q=#6C:gsb990				' 0x6C		''0x06''
+			900 ‘LCD
+			910 Z=#900:gsb960:Q=#CC:gsb990	' 0xCC
+			920 Q=12:gsb990:Z=#920:gsb960	' 0x0C, 0x(H)D, 0x(L)D
+			950 rtn
+			960 Q=peek(Z):ifQQ=Q&#F0|13:gsb990elsegoto980
+			970 Q=peek(Z)<<4|13:gsb990
+			980 Z=Z+1:ifZ&31=16rtnelsegoto960
+			990 poke#8ED,#FB&Q:ifi2cw(#27,#8EC,1,#8ED,1)?”E”elsertn
+			結線内容の具体例（PCF8574T -> HD44780）
+
+			https://bokunimo.net/blog/ichigo-jam/120/
+			例①　　　　　　例②
+			P0 -> DB4　　P0 -> RS
+			P1 -> DB5　　P1 -> R/W
+			P2 -> DB6　　P2 -> E
+			P3 -> DB7　　P3 -> BL
+			P4 -> E　　　P4 -> DB4
+			P5 -> R/W　　P5 -> DB5
+			P6 -> RS　　　P6 -> DB6
+			P7 -> BL　　　P7 -> DB7
+		*/
 	}
 	return !ret;
 }

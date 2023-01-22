@@ -43,7 +43,7 @@ https://bokunimo.net/git/raspi_lcd/blob/master/raspi_lcd.c
 #include "raspi_i2c.h"  // ###################### 【要注意】パス確認 ############
 // #include "../libs/soft_i2c.h" // #############       元ファイル版 ############
 
-#define VER "1.01"
+#define VER "1.02"
 
 typedef unsigned char byte;
 extern int ERROR_CHECK;				// オプション -i
@@ -87,6 +87,7 @@ int main(int argc,char **argv){
 				num++;
 				I2C = strtol(argv[num],NULL,16);
 			}
+			i2c_lcd_set_address(I2C);
 			printf("i2c address 0x(%02X)\n",I2C);
 		}
 		if(argv[num][1]=='r'){
