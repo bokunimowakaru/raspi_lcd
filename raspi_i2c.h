@@ -56,6 +56,7 @@ byte i2c_lcd_out(byte y,byte *lcd);
 void utf_del_uni(char *s);
 
 // LCD 初期化
+void i2c_lcd_set_address(byte i2c_address);
 byte i2c_lcd_init(void);
 byte i2c_lcd_init_xy(byte x, byte y);
 void i2c_lcd_set_xy(byte x, byte y);

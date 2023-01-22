@@ -48,6 +48,7 @@ https://bokunimo.net/git/raspi_lcd/blob/master/raspi_lcd.c
 typedef unsigned char byte;
 extern int ERROR_CHECK;				// オプション -i
 extern int SLOW_MODE;				// オプション -s
+int I2C=0;							// オプション -a I2Cアドレス変更
 int LOOP=0;							// オプション -f
 int PORT=-1;						// オプション -rPORT
 int WIDTH=8;						// オプション -wWIDTH
@@ -80,6 +81,14 @@ int main(int argc,char **argv){
 		if(argv[num][1]=='n') NOINIT=1;
 		if(argv[num][1]=='b') BAR=1;
 		if(argv[num][1]=='d'){DOT=1; BAR=1;}
+		if(argv[num][1]=='a'){
+			I2C=strtol(&argv[num][2],NULL,16);
+			if( I2C == 0 && argc > num+1 ){
+				num++;
+				I2C = strtol(argv[num],NULL,16);
+			}
+			printf("i2c address 0x(%02X)\n",I2C);
+		}
 		if(argv[num][1]=='r'){
 			PORT=atoi(&argv[num][2]);
 			if( PORT == 0 && argc > num+1 ){
@@ -119,13 +128,14 @@ int main(int argc,char **argv){
 		}
 		if(argv[num][1]=='h'){
 			printf("Usage: %s (Version %s)\n",argv[0],VER);
-			printf("  %s [-i] [-f] [-r port] [-w lcd_width] [-y row] text...\n",argv[0]);
-			printf("  %s [-i] [-f] [-r port] [-w lcd_width] [-y row] [-b|-d] value...\n",argv[0]);
+			printf("  %s [-i] [-a address] [-f] [-r port] [-w lcd_width] [-y row] text...\n",argv[0]);
+			printf("  %s [-i] [-a address] [-f] [-r port] [-w lcd_width] [-y row] [-b|-d] value...\n",argv[0]);
 			printf("  echo text... | %s [-i] [-f] [-r port] [-w lcd_width] [-y row]\n",argv[0]);
 			printf("  %s -h # shows this help\n",argv[0]);
 			printf("  %s -q # releases I2C ports\n\n",argv[0]);
 			printf("    options:\n");
 			printf("      -i      ignore I2C communication errors\n");
+			printf("      -aADR   set i2c address in hex (defalut=3E)\n");
 			printf("      -s      slowdown I2C communication mode\n");
 			printf("      -rPORT  set GPIO port number of reset LCD pin; number for PORT\n");
 			printf("      -wWIDTH set display digits; 8 or 16 for WITDH\n");
@@ -141,6 +151,7 @@ int main(int argc,char **argv){
 			printf("\n");
 			printf("    オプション(in Japanese):\n");
 			printf("      -i      I2C通信のエラーを無視する\n");
+			printf("      -aADR   I2Cアドレスを設定する\n");
 			printf("      -rPORT  液晶のリセット信号用GPIOポート番号\n");
 			printf("      -wWIDTH 液晶の表示桁数8または16\n");
 			printf("      -yROW   表示行1または2\n");
