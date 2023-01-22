@@ -163,3 +163,7 @@ venv.bak/
 *.tgz
 nohup.out
 voice/aquestalkpi/
+
+# for local
+example_pcf.sh
+french_pcf.sh
