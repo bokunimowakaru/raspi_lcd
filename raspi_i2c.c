@@ -91,6 +91,8 @@ int SLOW_MODE=0;								// 0:高速転送／1:低速転送
 static byte _I2C_lcd=I2C_lcd_AQM;
 static byte _lcd_size_x=8;
 static byte _lcd_size_y=2;
+enum _LcdModels {ST7032=0, PCF8574=1};
+static enum _LcdModels _lcd_model = ST7032;
 
 int _micros(){
 	#ifdef ARDUINO
@@ -791,7 +793,7 @@ byte i2c_lcd_out(byte y,byte *lcd){
 		data[1]=0xC0;
 		y=1;
 	}
-	if(_I2C_lcd == I2C_lcd_AQM){			// LCD ST7032 (AQM0802)
+	if(_lcd_model == ST7032){			// LCD ST7032 (AQM0802)
 		if(!SLOW_MODE){
 			ret += !i2c_write(_I2C_lcd, data, 2);
 			data[0]= 0x40; // 書き込みモード
@@ -813,7 +815,7 @@ byte i2c_lcd_out(byte y,byte *lcd){
 				if(ret)fprintf(stderr,"ERROR LOD_OUT Y=%d [%s]\n",y,lcd);
 			#endif
 		}
-	}else{	// LCD PCF8574T PCF8574A
+	}else if(_lcd_model == PCF8574){	// LCD PCF8574T PCF8574A
 			printf("debug: HD44780 + PCF8574T LCD (%02X) %s\n",data[1],lcd);
 			ret += !_i2c_write_4b(_I2C_lcd,data+1,1,0x0C);
 			if(!ret) for(i=0;i<_lcd_size_x;i++){
@@ -921,8 +923,15 @@ void utf_del_uni(char *s){
 
 	byte i2c_lcd_print(const char *s);
 
-void i2c_lcd_set_address(byte i2c_address){
+byte i2c_lcd_set_address(byte i2c_address){
 	_I2C_lcd=i2c_address;
+	return _I2C_lcd;
+}
+
+byte i2c_lcd_set_model(byte model){
+	if(model==(byte)ST7032)  _lcd_model = ST7032;
+	if(model==(byte)PCF8574) _lcd_model = PCF8574;
+	return (byte)_lcd_model;
 }
 
 byte i2c_lcd_init(void){
@@ -940,7 +949,7 @@ byte i2c_lcd_init(void){
 	data[4] |= (I2C_lcd_Contrast & 0x20)>>4; // Cnt 6bitの上位2桁
 	data[4] |= (I2C_lcd_Booster & 0x01)<<2;  // Boost 0(OFF=5V時)～1(ON=3.3V時)
 
-	if(_I2C_lcd == I2C_lcd_AQM){			// LCD ST7032 (AQM0802)
+	if(_lcd_model == ST7032){			// LCD ST7032 (AQM0802)
 		if(!SLOW_MODE){
 			ret+=!i2c_write(_I2C_lcd,data,8); 	// 仕様外(動作はする)
 			/********************************
@@ -1004,7 +1013,7 @@ byte i2c_lcd_init(void){
 				*/
 			//	i2c_lcd_print("Hello!  I2C LCD by Wataru Kunino");
 		}
-	}else{	// LCD PCF8574T PCF8574A
+	}else if(_lcd_model == PCF8574){	// LCD PCF8574T PCF8574A
 		//printf("debug: HD44780 + PCF8574T L, L, 0x3, Initial 1st Function Set, wait 4.1ms->5ms\n");
 		data[0]=0x3C; ret+=!i2c_write(_I2C_lcd,data,1); data[0] &= 0xFB; ret+=!i2c_write(_I2C_lcd,data,1); delay(5); 
 		//printf("debug: HD44780 + PCF8574T L, L, 0x3, Initial 2nd Function Set, wait 100us\n");
@@ -1062,7 +1071,7 @@ byte i2c_lcd_init(void){
 			P6 -> RS　　　P6 -> DB6
 			P7 -> BL　　　P7 -> DB7
 		*/
-	}
+	} else return 0;
 	return !ret;
 }
 

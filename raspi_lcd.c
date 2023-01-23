@@ -43,7 +43,7 @@ https://bokunimo.net/git/raspi_lcd/blob/master/raspi_lcd.c
 #include "raspi_i2c.h"  // ###################### 【要注意】パス確認 ############
 // #include "../libs/soft_i2c.h" // #############       元ファイル版 ############
 
-#define VER "1.02"
+#define VER "1.03"
 
 typedef unsigned char byte;
 extern int ERROR_CHECK;				// オプション -i
@@ -56,6 +56,9 @@ int ROW=0;							// オプション -yROW
 int NOINIT=0;						// オプション -n
 int BAR=0;							// オプション -b
 int DOT=0;							// オプション -d
+int MODEL=-1;						// オプション -m 対応デバイス番号
+
+const char models[2][8]={"ST7032","PCF8574"};
 
 const byte font_lv[64]={
 	0x00,0x10,0x00,0x10,0x00,0x10,0x00,0x10,
@@ -87,8 +90,17 @@ int main(int argc,char **argv){
 				num++;
 				I2C = strtol(argv[num],NULL,16);
 			}
-			i2c_lcd_set_address(I2C);
+			I2C=(int)i2c_lcd_set_address((byte)I2C);
 			printf("i2c address 0x(%02X)\n",I2C);
+		}
+		if(argv[num][1]=='m'){
+			MODEL=atoi(&argv[num][2]);
+			if( MODEL == 0 && argc > num+1 ){
+				num++;
+				MODEL = atoi(argv[num]);
+			}
+			MODEL = (int)i2c_lcd_set_model((byte)MODEL);
+			printf("i2c device model 0x(%02X) %s\n",MODEL,models[MODEL]);
 		}
 		if(argv[num][1]=='r'){
 			PORT=atoi(&argv[num][2]);
@@ -168,6 +180,14 @@ int main(int argc,char **argv){
 		}
 		num++;
 	}
+	if(MODEL < 0){ // モデル未設定
+		if(I2C != 0 && I2C != 0x3E ){	// アドレス設定済み 3E:ST70322, 38～3F:PCF8574
+			MODEL = 1;	// PCF8574		// 3EでもPCFの場合があるが、自動設定しない(AQM優先)
+			MODEL = (int)i2c_lcd_set_model((byte)MODEL);
+			printf("i2c device model 0x(%02X) %s\n",MODEL,models[MODEL]);
+		}else MODEL = 0; // ST70322
+	}
+	
 	/* レベルメータ用 ******************************************************* */
 	if((BAR > 0 || DOT > 0) && num < argc){
 		if( !i2c_init() ){

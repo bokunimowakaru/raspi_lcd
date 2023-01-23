@@ -28,6 +28,7 @@
 LCD_WIDTH="16"              # LCDの桁数 AQM0802は8桁、AQM1602は16桁
 LCD_IO="16"                 # LCD用電源用IOポート番号を指定する
 LCD_APP="./raspi_lcd"       # LCD表示用。※要makeの実行
+I2D_APP="./raspi_i2cdetect" # I2C検出アプリ ※要makeの実行
 LOG="/dev/stdout"           # ログファイル名(/dev/stdoutでコンソール表示)
 
 if [ ! -x $LCD_APP ]; then
@@ -37,6 +38,20 @@ if [ ! -x $LCD_APP ]; then
         if [ ! -x $LCD_APP ]; then
             LCD_APP="/home/pi/RaspberryPi/gpio/raspi_lcd"
 fi fi fi
+if [ ! -x $I2D_APP ]; then
+    I2D_APP=`which raspi_i2cdetect`
+    if [ ! -x $I2D_APP ]; then
+        I2D_APP="/home/pi/raspi_lcd/raspi_i2cdetect"
+        if [ ! -x $I2D_APP ]; then
+            I2D_APP="/home/pi/RaspberryPi/gpio/raspi_i2cdetect"
+fi fi fi
+
+# LCD用のI2Cアドレス 3E 3F 38 が見当たらなかったら終了
+I2ADR=`$I2D_APP -n 3E 3F 38`
+if [ $((`echo $I2ADR |wc -l`)) -eq 0 ]; then
+    echo "no I2C LCD found"
+    exit
+fi
 
 # 日時表示用 8桁/16桁LCD用
 date (){
@@ -65,7 +80,7 @@ lcd_reset (){
     # fi
     echo >> $LOG 2>&1
     sleep 0.1
-    $LCD_APP -i -w${LCD_WIDTH} -r${LCD_IO} "LCD reset GPIO"${LCD_IO} > /dev/null 2>&1
+    $LCD_APP -i -a${I2ADR} -w${LCD_WIDTH} -r${LCD_IO} "LCD reset GPIO"${LCD_IO} > /dev/null 2>&1
     sleep 0.1
 }
 
@@ -84,10 +99,10 @@ lcd (){
     fi
     if [ -x "$LCD_APP" ]; then
         if [ -n "${s2}" ]; then
-            $LCD_APP -i -n -w${LCD_WIDTH} ${s1} > /dev/null 2>&1
-            $LCD_APP -i -n -w${LCD_WIDTH} -y2 ${s2} > /dev/null 2>&1
+            $LCD_APP -i -a${I2ADR} -n -w${LCD_WIDTH} ${s1} > /dev/null 2>&1
+            $LCD_APP -i -a${I2ADR} -n -w${LCD_WIDTH} -y2 ${s2} > /dev/null 2>&1
         else
-            $LCD_APP -i -n -w${LCD_WIDTH} -y1 ${s1} > /dev/null 2>&1
+            $LCD_APP -i -a${I2ADR} -n -w${LCD_WIDTH} -y1 ${s1} > /dev/null 2>&1
         fi
     fi
     echo `date` "LCD" ${s1} "/" ${s2} >> $LOG 2>&1
