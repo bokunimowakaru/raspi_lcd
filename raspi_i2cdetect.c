@@ -55,6 +55,7 @@ int main(int argc,char **argv){
             }
             if(num){
                 if(ret){
+                    i2c_close();
                     printf("%02X\n",adr);
                     return 0;
                 }
@@ -67,6 +68,7 @@ int main(int argc,char **argv){
         ret=i2c_check(i);
         if(num){
             if(ret){
+                i2c_close();
                 printf("%02X\n",i);
                 return 0;
             }
