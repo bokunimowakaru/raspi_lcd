@@ -31,28 +31,6 @@ LCD_APP="./raspi_lcd"       # LCD表示用。※要makeの実行
 I2D_APP="./raspi_i2cdetect" # I2C検出アプリ ※要makeの実行
 LOG="/dev/stdout"           # ログファイル名(/dev/stdoutでコンソール表示)
 
-if [ ! -x $LCD_APP ]; then
-    LCD_APP=`which raspi_lcd`
-    if [ ! -x $LCD_APP ]; then
-        LCD_APP="/home/pi/raspi_lcd/raspi_lcd"
-        if [ ! -x $LCD_APP ]; then
-            LCD_APP="/home/pi/RaspberryPi/gpio/raspi_lcd"
-fi fi fi
-if [ ! -x $I2D_APP ]; then
-    I2D_APP=`which raspi_i2cdetect`
-    if [ ! -x $I2D_APP ]; then
-        I2D_APP="/home/pi/raspi_lcd/raspi_i2cdetect"
-        if [ ! -x $I2D_APP ]; then
-            I2D_APP="/home/pi/RaspberryPi/gpio/raspi_i2cdetect"
-fi fi fi
-
-# LCD用のI2Cアドレス 3E 3F 38 が見当たらなかったら終了
-I2ADR=`$I2D_APP -n 3E 3F 38`
-if [ $((`echo $I2ADR |wc -l`)) -eq 0 ]; then
-    echo "no I2C LCD found"
-    exit
-fi
-
 # 日時表示用 8桁/16桁LCD用
 date (){
     if [ ${LCD_WIDTH} -ge 16 ]; then
@@ -108,7 +86,39 @@ lcd (){
     echo `date` "LCD" ${s1} "/" ${s2} >> $LOG 2>&1
 }
 
-# 初期設定
+# アプリ検索
+echo `date` "SETTING UP ----------------------------" >> $LOG 2>&1
+
+if [ ! -x $LCD_APP ]; then
+    LCD_APP=`which raspi_lcd`
+    if [ ! -x $LCD_APP ]; then
+        LCD_APP="/home/pi/raspi_lcd/raspi_lcd"
+        if [ ! -x $LCD_APP ]; then
+            LCD_APP="/home/pi/RaspberryPi/gpio/raspi_lcd"
+fi fi fi
+echo `date` "LCD path" $LCD_APP >> $LOG 2>&1
+
+if [ ! -x $I2D_APP ]; then
+    I2D_APP=`which raspi_i2cdetect`
+    if [ ! -x $I2D_APP ]; then
+        I2D_APP="/home/pi/raspi_lcd/raspi_i2cdetect"
+        if [ ! -x $I2D_APP ]; then
+            I2D_APP="/home/pi/RaspberryPi/gpio/raspi_i2cdetect"
+fi fi fi
+echo `date` "I2C Detector path" $I2D_APP >> $LOG 2>&1
+
+# LCD用のI2Cアドレス 3E 3F 38 が見つかるまで確認
+I2ADR=`$I2D_APP -n 3E 3F 38`
+while [ -z $I2ADR ]; do
+    echo `date` "LCD no I2C devices found" >> $LOG 2>&1
+    echo `date` "LCD GPIO port" `$LCD_APP -q${LCD_IO}` >> $LOG 2>&1
+    sleep 5
+    I2ADR=`$I2D_APP -n 3E 3F 38`
+done
+
+echo `date` "I2C LCD Address" $I2ADR >> $LOG 2>&1
+
+# LCDの初期設定
 echo `date` "STARTED -------------------------------" >> $LOG 2>&1
 lcd_reset >> $LOG 2>&1
 lcd >> $LOG 2>&1
@@ -128,4 +138,5 @@ sleep 5
 lcd "01234567" "8ｹﾀﾋｮｳｼﾞ" >> $LOG 2>&1
 sleep 5
 
+echo `date` "LCD Remove I2C on GPIO port" `$LCD_APP -q${LCD_IO}` >> $LOG 2>&1
 exit
