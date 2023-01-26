@@ -9,13 +9,14 @@ from time import sleep									# スリープ実行モジュールの取得
 
 class RaspiLcd:
 
-	def __init__(self,ignoreError=False,x=16,reset=0):	# コンストラクタ作成
+	def __init__(self,adr=0x3e,ignoreError=False,x=16,reset=0):	# コンストラクタ作成
 		self.restoreUsedGpio = False					# 使用したGPIOを終了時に開放しない
 		self.title = "ﾎﾞｸﾆﾓﾜｶﾙ Rasp.Pi by bokunimo.net"
 		self.dir = os.path.dirname(__file__)
 		self.ignoreError = ignoreError
-		self.reset_port  = reset						# GPIO ポート番号
+		self.adress  = adr								# I2Cアドレス
 		self.width = x									# LCD Digits
+		self.reset_port  = reset						# GPIO ポート番号
 		self.bar = None									# 棒グラフの初期化状態
 		print(datetime.datetime.today().strftime('%Y/%m/%d %H:%M:%S'), end=' ') # 日時
 		print('LCD initialized')
@@ -42,6 +43,8 @@ class RaspiLcd:
 			data = self.title
 		path = self.dir + '/raspi_lcd'					# raspi_lcd モジュールのパス
 		app = [path]	# 起動設定
+		if self.adress >= 8 and self.adress <= 119:
+			app.append('-a' + format(self.adress, 'X'))
 		if self.ignoreError == True:
 			app.append('-i')
 		if self.width > 8:
@@ -51,7 +54,7 @@ class RaspiLcd:
 		elif self.reset_port > 0:
 			app.append('-r'+str(self.reset_port))
 		app.append(data)
-		# print(app)									# DEBUG app引数確認用
+		# print('DEBUG:',app)							# DEBUG app引数確認用
 		res = subprocess.run(app,input=None,stdout=subprocess.PIPE)# サブプロセスとして起動
 		ret = res.returncode							# 終了コードをretへ代入
 		print(datetime.datetime.today().strftime('%Y/%m/%d %H:%M:%S'), end=' ') # 日時
@@ -74,6 +77,8 @@ class RaspiLcd:
 			raise Exception('ERROR: LCD width')
 		path = self.dir + '/raspi_lcd'					# raspi_lcd モジュールのパス
 		app = [path]	# 起動設定
+		if self.adress >= 8 and self.adress <= 119:
+			app.append('-a' + format(self.adress, 'X'))
 		if self.ignoreError == True:
 			app.append('-i')
 		if self.bar is None:
