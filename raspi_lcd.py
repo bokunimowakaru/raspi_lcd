@@ -142,4 +142,46 @@ if __name__ == "__main__":
 '''
 実行結果例
 
+pi@raspberrypi:~/raspi_lcd $ ./raspi_lcd.py
+2023/01/26 21:17:50 LCD initialized
+Usage: /home/pi/raspi_lcd/./raspi_lcd (Version 1.04)
+  /home/pi/raspi_lcd/./raspi_lcd [-i] [-a address] [-f] [-r port] [-w lcd_width] [-y row] text...
+  /home/pi/raspi_lcd/./raspi_lcd [-i] [-a address] [-f] [-r port] [-w lcd_width] [-y row] [-b|-d] value...
+  echo text... | /home/pi/raspi_lcd/./raspi_lcd [-i] [-f] [-r port] [-w lcd_width] [-y row]
+  /home/pi/raspi_lcd/./raspi_lcd -h # shows this help
+  /home/pi/raspi_lcd/./raspi_lcd -q # releases I2C ports
+
+    options:
+      -i      ignore I2C communication errors
+      -aADR   set i2c address in hex (defalut=3E)
+      -s      slowdown I2C communication mode
+      -rPORT  set GPIO port number of reset LCD pin; number for PORT
+      -wWIDTH set display digits; 8 or 16 for WITDH
+      -yROW   set display row; 1 or 2 for ROW
+      -b      display bar graph
+      -d      display dot graph
+      text... display text string on the LCD
+      -n      skip initializing LCD
+      -f      use standard input, continuously
+      -qPORT  restore GPIO port and I2C ports
+      -h      display this help on the terminal
+      -v      show version (for 1.01 and greater)
+
+    オプション(in Japanese):
+      -i      I2C通信のエラーを無視する
+      -aADR   I2Cアドレスを設定する
+      -rPORT  液晶のリセット信号用GPIOポート番号
+      -wWIDTH 液晶の表示桁数8または16
+      -yROW   表示行1または2
+      -b      レベルメータ表示
+      -d      ドットメータ表示
+      text... 表示したい文字列
+      -n      液晶の初期化を実行しない
+      -f      標準入力から待ち受けを行う（終了しない）
+      -qPORT  使用していたGPIOポートの開放
+      -h      本ヘルプの表示
+      -v      バージョン表示(1.01～)
+2023/01/26 21:17:51 LCD ﾎﾞｸﾆﾓﾜｶﾙ Rasp.Pi /  by bokunimo.net
+2023/01/26 21:17:51 LCD Done
+
 '''
