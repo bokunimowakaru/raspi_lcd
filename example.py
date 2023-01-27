@@ -9,14 +9,17 @@ from time import sleep                                  # スリープ実行モ�
 print(datetime.today().strftime('%Y/%m/%d %H:%M:%S'), "Started Example for LCD ---------------")
 
 i2det = raspi_i2cdetect.RaspiI2cDetect()                # i2detの生成
-address = i2det.list([0x3E,0x3F,0x38],False)
+address = i2det.list([0x3E,0x3F,0x27,0x38,0x20],False)
+raspiLcd = raspi_lcd.RaspiLcd(address,True,x=16,reset=16)   # raspiLcdの生成
 print(datetime.today().strftime('%Y/%m/%d %H:%M:%S'), "I2C Address =", hex(address))
-if address == 0:
+while address == 0:
     print(datetime.today().strftime('%Y/%m/%d %H:%M:%S'), "I2C ERROR")
-    exit()
+    sleep(5)
+    del raspiLcd
+    address = i2det.list([0x3E,0x3F,0x27,0x38,0x20],False)
+    raspiLcd = raspi_lcd.RaspiLcd(address,True,x=16,reset=16)   # raspiLcdの生成
 sleep(1)
 
-raspiLcd = raspi_lcd.RaspiLcd(address,True,x=16,reset=16)   # raspiLcdの生成
 
 date=datetime.today()                                  # 日付を取得
 print(date.strftime('%Y/%m/%d %H:%M:%S'), "Example for AQM1602A/Y/Grove ----------")

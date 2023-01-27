@@ -107,8 +107,8 @@ if [ ! -x $I2D_APP ]; then
 fi fi fi
 echo `date` "I2C Detector path" $I2D_APP >> $LOG 2>&1
 
-# LCD用のI2Cアドレス 3E 3F 38 が見つかるまで確認
-I2ADR=`$I2D_APP -n 3E 3F 38`
+# LCD用のI2Cアドレス 3E 3F 27 38 20 が見つかるまで確認
+I2ADR=`$I2D_APP -n 3E 3F 27 38 20`
 while [ -z $I2ADR ]; do
     echo `date` "LCD no I2C devices found" >> $LOG 2>&1
     echo `date` "LCD GPIO port" `$LCD_APP -q${LCD_IO}` >> $LOG 2>&1

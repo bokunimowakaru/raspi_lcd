@@ -20,6 +20,7 @@ class RaspiLcd:
 		self.bar = None									# 棒グラフの初期化状態
 		print(datetime.datetime.today().strftime('%Y/%m/%d %H:%M:%S'), end=' ') # 日時
 		print('LCD initialized')
+		self.print()
 
 	def help(self):
 		path = self.dir + '/raspi_lcd'					# raspi_lcd モジュールのパス
@@ -106,14 +107,15 @@ class RaspiLcd:
 
 	def __del__(self):									# インスタンスの削除
 		if self.restoreUsedGpio and self.reset_port > 0:
-			print(datetime.datetime.today().strftime('%Y/%m/%d %H:%M:%S'), end=' ') # 日時
-			print('LCD restore GPIO'+str(self.reset_port), 'to free')
+			if sys.meta_path is not None:
+				print(datetime.datetime.today().strftime('%Y/%m/%d %H:%M:%S'), end=' ')
+				print('LCD restore GPIO'+str(self.reset_port), 'to free')
 			sleep(5)
 			path = self.dir + '/raspi_lcd'				# IR 受信ソフトモジュールのパス
 			app = [path, '-q'+str(self.reset_port)]		# ポートの開放
 			# print(app)								# DEBUG app引数確認用
 			res = subprocess.run(app,stdout=subprocess.PIPE)  # サブプロセスとして起動
-			if res.returncode != 0: 					# 終了コードを確認
+			if res.returncode != 0 and sys.meta_path is not None: # 終了コードを確認
 				print(res.stdout.decode().strip())		# 結果を表示
 				print('WARN: Failed to Disable Port',self.reset_port)
 		if sys.meta_path is not None:
