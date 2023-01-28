@@ -1,6 +1,6 @@
 # raspi_lcd
 
-I2C LCD Device Driver for Raspberry Pi, AQM0802A, AQM1602A, AQM1602Y, GROVE-LCD, and ST7032i  
+I2C LCD Device Driver for Raspberry Pi. It supports LCD controller IC ST7032i in AQM0802A, AQM1602A, AQM1602Y, and GROVE-LCD, and HD44780 and it's compatible IC with PCF8574T or PCF8574A in General 1602 LCDs.  
 
 Supported Raspberry Pi: 1, 2, 3, 4, Zero, Zero W, Zero W2  
 
@@ -33,9 +33,13 @@ This is for CPU Load Monitor [example_cpu.sh](https://github.com/bokunimowakaru/
 
 ## Handmade Examples
 
-The picture below shows it connected to the Raspberry Pi Zero. Other Raspberry Pi (1/2/3/4 etc.) can be connected in the same way.  
+The picture below shows Xiamen Zettler Electronics AQM1602 LCD connected to the Raspberry Pi Zero. Other Raspberry Pis (1/2/3/4 etc.) can be connected in the same way.  
 
 ![AQM1602](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/aqm1602.jpg?raw=true)
+
+Also supports General 1602 LCDs (HD44780 + PCF8574T / PCF8574A):  
+
+![General1602](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/general1602.jpg?raw=true)
 
 It works on the 1st generation Raspbeery Pi:  
 
@@ -47,7 +51,9 @@ It can display French Latin letters, if your LCD hardware supports (Grove LCD ca
 
 The above shows an example of CPU Load Monitor which displays a time, load and temperature of CPU, temperature, and percentage of used SD card and used memory. Enter the command "./example_cpu.sh" to execute this source code [example_cpu.sh](https://github.com/bokunimowakaru/raspi_lcd/blob/master/example_cpu.sh).  
 
-![CPU_Load{width: 200px;}](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/DSC_2274.jpg?raw=true)
+![CPU_Load](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/example_cpu_cased.jpg?raw=true)
+
+![CPU_Load](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/example_cpu?raw=true)
 
 I made it to display the radio channel name of the Internet radio, the artist and the song names of the jukebox. You can use it in another repository [bokunimowakaru/audio/radio/pi](https://github.com/bokunimowakaru/audio/tree/master/radio/pi).  
 

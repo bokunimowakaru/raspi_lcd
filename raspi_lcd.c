@@ -43,7 +43,7 @@ https://bokunimo.net/git/raspi_lcd/blob/master/raspi_lcd.c
 #include "raspi_i2c.h"  // ###################### 【要注意】パス確認 ############
 // #include "../libs/soft_i2c.h" // #############       元ファイル版 ############
 
-#define VER "1.03"
+#define VER "1.04"
 
 typedef unsigned char byte;
 extern int ERROR_CHECK;				// オプション -i
