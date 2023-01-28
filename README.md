@@ -53,7 +53,7 @@ The above shows an example of CPU Load Monitor which displays a time, load and t
 
 ![CPU_Load](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/example_cpu_cased.jpg?raw=true)
 
-![CPU_Load](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/example_cpu?raw=true)
+![CPU_Load](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/example_cpu.jpg?raw=true)
 
 I made it to display the radio channel name of the Internet radio, the artist and the song names of the jukebox. You can use it in another repository [bokunimowakaru/audio/radio/pi](https://github.com/bokunimowakaru/audio/tree/master/radio/pi).  
 
@@ -72,6 +72,13 @@ I made it to display the radio channel name of the Internet radio, the artist an
 	$ make ⏎
 
 ## Testing
+
+The first, run example.py for testing the driver works:  
+
+	$ cd ~/raspi_lcd ⏎
+	$ ./example.py ⏎
+
+After that, use "raspi_lcd" command which can be set full optional functions:  
 
 	$ cd ~/raspi_lcd ⏎
 	$ ./raspi_lcd -i -w16 "Raspberry Pi LCD by bokunimo.net" ⏎
