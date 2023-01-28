@@ -23,9 +23,13 @@ Select language to transrate this page:
 
 ![Schematic1](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/schematic.png?raw=true)
 
-On the above Schematic, the power supply for the LCD is from GPIO16, to control the power and hardware reset function from Raspberry Pi. 
+On the above Schematics, the power supply for the LCD is from GPIO16, to control the power and hardware reset function from Raspberry Pi. 
 
 ![Schematic2](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/schematic2.png?raw=true)
+
+This is for CPU Load Monitor [example_cpu.sh](https://github.com/bokunimowakaru/raspi_lcd/blob/master/example_cpu.sh) on GitHub.  
+
+![Schematic3](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/schematic3.png?raw=true)
 
 ## Handmade Examples
 
@@ -41,7 +45,11 @@ It can display French Latin letters, if your LCD hardware supports (Grove LCD ca
 
 ![Latin](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/latin.jpg?raw=true)
 
-I made it to display the radio channel name of the Internet radio, the artist and the song names of the jukebox, .  
+The above shows an example of CPU Load Monitor which displays a time, load and temperature of CPU, temperature, and percentage of used SD card and used memory. Enter the command "./example_cpu.sh" to execute this source code [example_cpu.sh](https://github.com/bokunimowakaru/raspi_lcd/blob/master/example_cpu.sh).  
+
+![CPU_Load{width: 200px;}](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/DSC_2274.jpg?raw=true)
+
+I made it to display the radio channel name of the Internet radio, the artist and the song names of the jukebox. You can use it in another repository [bokunimowakaru/audio/radio/pi](https://github.com/bokunimowakaru/audio/tree/master/radio/pi).  
 
 ![Radio](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/radio.jpg?raw=true)
 
