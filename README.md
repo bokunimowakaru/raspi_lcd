@@ -81,22 +81,24 @@ The first, run example.py for testing the driver works:
 After that, use "raspi_lcd" command which can be set full optional functions:  
 
 	$ cd ~/raspi_lcd ⏎
-	$ ./raspi_lcd -i -w16 "Raspberry Pi LCD by bokunimo.net" ⏎
+	$ ./raspi_lcd -a3E -i -w16 "Raspberry Pi LCD by bokunimo.net" ⏎
+	(The arg "-a3e" sets I2C address to 3E, arg "-w16" sets the display digit width.)
 
 ## Usage
 
 "-h" option shows usage:  
 
 	$ ./raspi_lcd -h
-	Usage: ./raspi_lcd (Version 1.01)
-	  ./raspi_lcd [-i] [-f] [-r port] [-w lcd_width] [-y row] text...
-	  ./raspi_lcd [-i] [-f] [-r port] [-w lcd_width] [-y row] [-b|-d] value...
+	Usage: ./raspi_lcd (Version 1.04)
+	  ./raspi_lcd [-i] [-a address] [-f] [-r port] [-w lcd_width] [-y row] text...
+	  ./raspi_lcd [-i] [-a address] [-f] [-r port] [-w lcd_width] [-y row] [-b|-d] value...
 	  echo text... | ./raspi_lcd [-i] [-f] [-r port] [-w lcd_width] [-y row]
 	  ./raspi_lcd -h # shows this help
 	  ./raspi_lcd -q # releases I2C ports
 
 	    options:
 	      -i      ignore I2C communication errors
+	      -aADR   set i2c address in hex (defalut=3E)
 	      -s      slowdown I2C communication mode
 	      -rPORT  set GPIO port number of reset LCD pin; number for PORT
 	      -wWIDTH set display digits; 8 or 16 for WITDH
