@@ -49,7 +49,7 @@ It can display French Latin letters, if your LCD hardware supports (Grove LCD ca
 
 ![Latin](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/latin.jpg?raw=true)
 
-The following picture shows an example of CPU Load Monitor which displays a time, load and temperature of CPU, temperature, and percentage of used SD card and used memory. Enter the command "./example_cpu.sh" to execute this source code [example_cpu.sh](https://github.com/bokunimowakaru/raspi_lcd/blob/master/example_cpu.sh).  
+The following pictures show an example of CPU Load Monitor which displays a time, load and temperature of CPU, temperature, and percentage of used SD card and used memory. Enter the command "./example_cpu.sh" to execute this source code [example_cpu.sh](https://github.com/bokunimowakaru/raspi_lcd/blob/master/example_cpu.sh).  
 
 ![CPU_Load](https://github.com/bokunimowakaru/raspi_lcd/blob/master/images/example_cpu_cased.jpg?raw=true)
 
