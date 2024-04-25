@@ -85,7 +85,7 @@ lcd (){
     echo `date` "LCD" ${s1} "/" ${s2} >> $LOG 2>&1
 }
 
-echo "Usage: "${0}" [string1] [string1]"    # プログラム名と使い方を表示する
+echo "Usage: "${0}" [string1] [string2]"    # プログラム名と使い方を表示する
 
 # LCDの初期設定
 echo `date` "STARTED -------------------------------" >> $LOG 2>&1
