@@ -37,7 +37,7 @@ lcd_reset (){
     echo >> $LOG 2>&1
     ${gpio_app} "set" ${LCD_IO} ${d[0]}  # GPIOにLレベルを出力
     sleep 0.1
-    ${gpio_app} "set" ${LCD_IO} ${d[0]}  # GPIOにHレベルを出力
+    ${gpio_app} "set" ${LCD_IO} ${d[1]}  # GPIOにHレベルを出力
     sleep 0.1
     #         Ch I2C       IS=1 OSC=4 Cnt=3 Pow  FC   IS=0 ON
     i2cset -y  1 0x3e 0x00 0x39  0x14  0x73 0x56 0x6c 0x38 0x0C i
