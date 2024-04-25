@@ -2,7 +2,9 @@
 
 I2C LCD Device Driver for Raspberry Pi. It supports LCD controller IC ST7032i in AQM0802A, AQM1602A, AQM1602Y, and GROVE-LCD, and HD44780 and it's compatible IC with PCF8574T or PCF8574A in General 1602 LCDs.  
 
-Supported Raspberry Pi: 1, 2, 3, 4, Zero, Zero W, Zero W2  
+Supported Raspberry Pi: 1, 2, 3, 4, Zero, Zero W, Zero W2.  
+
+And only one code "example_Pi5.sh" is for Rapberry Pi 5.  
 
 ## Features
 
